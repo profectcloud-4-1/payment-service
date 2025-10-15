@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class Cart {
+
 	private UUID id;
 	private UUID customerId;
 	private int totalQuantity;
@@ -24,8 +25,8 @@ public class Cart {
 
 	public void addItem(final CartItem item) {
 		Optional<CartItem> existingItem = items.stream()
-			.filter(i -> i.getProductId().equals(item.getProductId()))
-			.findFirst();
+				.filter(i -> i.getProductId().equals(item.getProductId()))
+				.findFirst();
 
 		if (existingItem.isPresent()) {
 			CartItem existingCartItem = existingItem.get();
@@ -40,8 +41,8 @@ public class Cart {
 
 	public void updateItem(final UUID cartItemId, final int quantity) {
 		Optional<CartItem> existingItem = items.stream()
-		.filter(i -> i.getId().equals(cartItemId))
-		.findFirst();
+				.filter(i -> i.getId().equals(cartItemId))
+				.findFirst();
 
 		if (existingItem.isPresent()) {
 			CartItem existingCartItem = existingItem.get();
@@ -67,18 +68,9 @@ public class Cart {
 	}
 
 	public void calculateTotal() {
-		totalQuantity = items.stream().mapToInt(CartItem::getQuantity).sum();
-		totalPrice = items.stream()
-			.mapToInt(item -> item.getPrice() * item.getQuantity())
-			.sum();
+		this.totalQuantity = items.stream().mapToInt(CartItem::getQuantity).sum();
+		this.totalPrice = items.stream()
+				.mapToInt(item -> item.getPrice() * item.getQuantity())
+				.sum();
 	}
-
-	public void setTotalQuantity(final int totalQuantity) {
-		this.totalQuantity = totalQuantity;
-	}
-
-	public void setTotalPrice(final int totalPrice) {
-		this.totalPrice = totalPrice;
-	}
-
 }
