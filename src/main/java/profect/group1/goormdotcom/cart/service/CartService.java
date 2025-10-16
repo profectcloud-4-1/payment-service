@@ -47,11 +47,11 @@ public class CartService {
 		if (cart.hasProduct(productId)) {
 			CartItem cartItem = cart.getCartItemByProductId(productId);
 
-			cart.updateItem(cartItem.getCartId(), quantity);
+			cart = cart.updateItem(cartItem.getCartId(), quantity);
 		} else {
 			CartItem cartItem = new CartItem(cart.getId(), productId, quantity, price);
 
-			cart.addItem(cartItem);
+			cart = cart.addItem(cartItem);
 			cartItemRepository.save(CartItemMapper.toEntity(cartItem));
 		}
 
@@ -64,12 +64,12 @@ public class CartService {
 			final int quantity
 	) {
 		Cart cart = getCart(customerId);
-		cart.updateItem(cartItemId, quantity);
+		cart = cart.updateItem(cartItemId, quantity);
 
 		CartItem cartItem = cart.getCartItem(cartItemId);
 		cartItemRepository.save(CartItemMapper.toEntity(cartItem));
 
-		return getCart(customerId);
+		return cart;
 	}
 
 	public Cart deleteCartItem(
@@ -77,7 +77,7 @@ public class CartService {
 			final UUID cartItemId
 	) {
 		Cart cart = getCart(customerId);
-		cart.deleteItemById(cartItemId);
+		cart = cart.deleteItemById(cartItemId);
 
 		cartItemRepository.deleteById(cartItemId);
 
@@ -89,7 +89,7 @@ public class CartService {
 			final List<UUID> cartItemIds
 	) {
 		Cart cart = getCart(customerId);
-		cart.deleteBulkItem(cartItemIds);
+		cart = cart.deleteBulkItem(cartItemIds);
 
 		cartItemRepository.deleteAllByIdInBatch(cartItemIds);
 
@@ -109,7 +109,7 @@ public class CartService {
 		cartItemRepository.deleteAllByCartId(entity.getId());
 
 		Cart cart = CartMapper.toDomain(entity, List.of());
-		cart.clear();
+		cart = cart.clear();
 
 		return cart;
 	}
@@ -118,8 +118,8 @@ public class CartService {
 	public Cart getCart(final UUID customerId) {
 		CartEntity cartEntity = cartRepository.findByCustomerId(customerId)
 				.orElseThrow(() -> new IllegalArgumentException("Cart not found"));
-		List<CartItemEntity> cartItemEntities = cartItemRepository.findByCartId(cartEntity.getId());
 
+		List<CartItemEntity> cartItemEntities = cartItemRepository.findByCartId(cartEntity.getId());
 		List<CartItem> cartItems = cartItemEntities.stream().map(CartItemMapper::toDomain).toList();
 
 		return CartMapper.toDomain(cartEntity, cartItems);

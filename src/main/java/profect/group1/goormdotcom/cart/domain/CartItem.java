@@ -33,15 +33,19 @@ public class CartItem {
 		this.price = price;
 	}
 
-	public void addQuantity(final int additionalQuantity) {
+	public CartItem addQuantity(final int additionalQuantity) {
 		this.quantity += additionalQuantity;
+
+		return new CartItem(this.id, this.cartId, this.productId, this.quantity, this.price,
+				this.createdAt, this.updatedAt, this.deletedAt);
 	}
 
-	public void updateQuantity(final int quantity) {
+	public CartItem withQuantity(final int quantity) {
 		if (quantity < 0) {
 			throw new IllegalArgumentException("Quantity cannot be negative");
 		}
 
-		this.quantity = quantity;
+		return new CartItem(this.id, this.cartId, this.productId, quantity, this.price,
+				this.createdAt, this.updatedAt, this.deletedAt);
 	}
 }

@@ -39,24 +39,27 @@ public class Cart {
 		calculateTotal();
 	}
 
-	public void addItem(final CartItem item) {
-		Optional<CartItem> existingItem = items.stream()
+	public Cart addItem(final CartItem item) {
+		List<CartItem> newItems = new ArrayList<>(this.items);
+		Optional<CartItem> existingItem = newItems.stream()
 				.filter(i -> i.getProductId().equals(item.getProductId()))
 				.findFirst();
 
 		if (existingItem.isPresent()) {
 			CartItem existingCartItem = existingItem.get();
+			CartItem newCartItem = existingCartItem.addQuantity(item.getQuantity());
 
-			existingCartItem.addQuantity(item.getQuantity());
+			newItems.set(newItems.indexOf(existingCartItem), newCartItem);
 		} else {
-			items.add(item);
+			newItems.add(item);
 		}
 
-		calculateTotal();
+		return new Cart(this.id, this.customerId, newItems, this.createdAt, this.updatedAt);
 	}
 
-	public void updateItem(final UUID cartItemId, final int quantity) {
-		Optional<CartItem> existingItem = items.stream()
+	public Cart updateItem(final UUID cartItemId, final int quantity) {
+		List<CartItem> newItems = new ArrayList<>(this.items);
+		Optional<CartItem> existingItem = newItems.stream()
 				.filter(i -> i.getId().equals(cartItemId))
 				.findFirst();
 
@@ -65,9 +68,11 @@ public class Cart {
 		}
 
 		CartItem existingCartItem = existingItem.get();
+		CartItem updatedCartItem = existingCartItem.withQuantity(quantity);
 
-		existingCartItem.updateQuantity(quantity);
-		calculateTotal();
+		newItems.set(newItems.indexOf(existingCartItem), updatedCartItem);
+
+		return new Cart(this.id, this.customerId, newItems, this.createdAt, this.updatedAt);
 	}
 
 	public boolean hasProduct(final UUID productId) {
@@ -87,19 +92,24 @@ public class Cart {
 				.orElseThrow(() -> new IllegalArgumentException("Item not exists"));
 	}
 
-	public void deleteItemById(final UUID itemId) {
-		items.removeIf(i -> i.getId().equals(itemId));
-		calculateTotal();
+	public Cart deleteItemById(final UUID itemId) {
+		List<CartItem> newItems = new ArrayList<>(this.items);
+		newItems.removeIf(i -> i.getId().equals(itemId));
+
+		return new Cart(this.id, this.customerId, newItems, this.createdAt, this.updatedAt);
 	}
 
-	public void deleteBulkItem(final List<UUID> items) {
-		items.forEach(this::deleteItemById);
-		calculateTotal();
+	public Cart deleteBulkItem(final List<UUID> cartItemIds) {
+		List<CartItem> newItems = new ArrayList<>(this.items);
+		newItems.removeIf(item -> cartItemIds.contains(item.getId()));
+
+		return new Cart(this.id, this.customerId, newItems, this.createdAt, this.updatedAt);
 	}
 
-	public void clear() {
-		items.clear();
-		calculateTotal();
+	public Cart clear() {
+		List<CartItem> newItems = new ArrayList<>();
+
+		return new Cart(this.id, this.customerId, newItems, this.createdAt, this.updatedAt);
 	}
 
 	public void calculateTotal() {
