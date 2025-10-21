@@ -4,3 +4,12 @@ spring:
   profiles:
     active: dev
     include: secret
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: never
