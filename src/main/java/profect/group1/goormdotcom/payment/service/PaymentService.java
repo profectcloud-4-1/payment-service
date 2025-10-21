@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
 import profect.group1.goormdotcom.apiPayload.exceptions.handler.PaymentHandler;
 import profect.group1.goormdotcom.payment.config.TossPaymentConfig;
+import profect.group1.goormdotcom.payment.controller.dto.request.PaymentCancelRequestDto;
 import profect.group1.goormdotcom.payment.controller.dto.request.PaymentCreateRequestDto;
 import profect.group1.goormdotcom.payment.controller.dto.request.PaymentFailRequestDto;
 import profect.group1.goormdotcom.payment.controller.dto.request.PaymentSuccessRequestDto;
@@ -26,6 +27,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final TossPaymentConfig tossPaymentConfig;
 
+    @Transactional
     public Payment requestPayment(PaymentCreateRequestDto dto, User user) {
         //TODO: order에서 orderId 존재하는지 확인? MSA에서는 처리할 것인지 고민
 
@@ -64,6 +66,7 @@ public class PaymentService {
         return "ORD-" + ts + "-" + rand;
     }
 
+    @Transactional
     public Payment tossPaymentSuccess(PaymentSuccessRequestDto dto) {
         System.out.println("[SUCCESS] raw dto.orderId='" + dto.getOrderId() + "'");
         System.out.println("[SUCCESS] raw dto.amount=" + dto.getAmount());
@@ -87,7 +90,7 @@ public class PaymentService {
                 .bodyValue(java.util.Map.of(
                         "paymentKey", dto.getPaymentKey(),
                         "orderId", dto.getOrderId(),
-                        "amount", dto.getAmount()+1
+                        "amount", dto.getAmount()
                 ))
                 .retrieve()
                 .bodyToMono(String.class)
@@ -99,6 +102,7 @@ public class PaymentService {
         return PaymentMapper.toDomain(paymentEntity);
     }
 
+    @Transactional
     public void tossPaymentFail(PaymentFailRequestDto dto) {
         PaymentEntity paymentEntity = paymentRepository.findByOrderNumber(dto.getOrderId())
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
