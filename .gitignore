@@ -39,3 +39,6 @@ out/
 ### resources ###
 /src/main/resources/*
 !/src/main/resources/application.yml
+
+### application profiles ###
+config/application-*.yml

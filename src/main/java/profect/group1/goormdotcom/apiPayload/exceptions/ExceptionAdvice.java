@@ -16,6 +16,7 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.security.access.AccessDeniedException;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.BaseErrorCode;
 import profect.group1.goormdotcom.apiPayload.code.ErrorReasonDTO;
@@ -109,6 +110,13 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
                 errorCode.getReasonHttpStatus().getHttpStatus(),
                 request
         );
+    }
+
+    // 권한 부족 - 403 에러 응답 (security가 던진 예외를 여기서 처리)
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDenied(AccessDeniedException e, WebRequest request) {
+        BaseErrorCode errorCode = ErrorStatus._FORBIDDEN;
+        return handleExceptionInternalFalse(e, errorCode, HttpHeaders.EMPTY, errorCode.getReasonHttpStatus().getHttpStatus(), request, errorCode.getReason().getMessage());
     }
 
     // 처리되지 않은 예외 - 500 에러 응답
