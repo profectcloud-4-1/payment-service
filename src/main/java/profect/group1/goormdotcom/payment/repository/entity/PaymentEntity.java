@@ -5,7 +5,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import profect.group1.goormdotcom.common.domain.BaseEntity;
 import profect.group1.goormdotcom.payment.domain.enums.PayType;
 import profect.group1.goormdotcom.payment.domain.enums.Status;
 
@@ -16,19 +20,27 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 
-//TODO: BaseEntity 상속받기
 @Entity
 @Table(name = "p_payment")
 @EntityListeners(AuditingEntityListener.class)
-public class PaymentEntity {
+public class PaymentEntity extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id", nullable = false, columnDefinition = "BINARY(16)")
+    @GeneratedValue
+    @UuidGenerator
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(columnDefinition = "uuid", nullable = false)
     private UUID id;
 
-    @Column(name = "order_id", nullable = false, columnDefinition = "BINARY(16)")
+    @JdbcTypeCode(SqlTypes.UUID)
+    @Column(name = "order_id", columnDefinition = "uuid", nullable = false)
     private UUID orderId;
+
+    @Column(name = "order_number", length = 200, nullable = false)
+    private String orderNumber;
+
+    @Column(name = "order_name", length = 200, nullable = false)
+    private String orderName;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "pay_type", nullable = false, length = 32)
@@ -44,14 +56,6 @@ public class PaymentEntity {
     @Column(name = "payment_key", length = 200, nullable = true)
     private String paymentKey;
 
-    @Column(name = "fail_reason", nullable = true)
-    private String failReason;
-
-    @Column(name = "is_cancelled", nullable = false)
-    private boolean isCancelled;
-
-    @Column(name = "cancel_reason", nullable = true)
-    private String cancelReason;
 
     @Column(name = "approved_at", nullable = true)
     private LocalDateTime approvedAt;
@@ -66,6 +70,13 @@ public class PaymentEntity {
         this.payType = payType;
         this.amount = amount;
         this.status = Status.PENDING;
-        this.isCancelled = false;
+    }
+
+    public void setPaymentKey(String paymentKey) {
+        this.paymentKey = paymentKey;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 }

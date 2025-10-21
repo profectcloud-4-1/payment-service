@@ -14,7 +14,6 @@ public class PaymentDtoMapper {
     public static PaymentResponseDto toPaymentDto(Payment payment) {
         return new PaymentResponseDto(
                 payment.getId(),
-                payment.getOrderId(),
                 payment.getPayType(),
                 payment.getStatus(),
                 payment.getAmount()

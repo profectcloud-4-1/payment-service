@@ -11,6 +11,8 @@ import java.util.UUID;
 @Builder
 public class PaymentCreateRequestDto {
     private UUID orderId;
+    private String orderNumber;
+    private String orderName;
     private PayType payType;
     private Long amount;
 }
