@@ -22,7 +22,7 @@ import profect.group1.goormdotcom.common.domain.BaseEntity;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "cart_item")
+@Table(name = "p_cart_item")
 @Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
 @SQLDelete(sql = "update cart_item set deleted_at = NOW(), cartId = NULL where id = ?")
 @EntityListeners(AuditingEntityListener.class)

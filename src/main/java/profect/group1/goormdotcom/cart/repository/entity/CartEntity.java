@@ -17,7 +17,7 @@ import profect.group1.goormdotcom.common.domain.BaseEntity;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "cart")
+@Table(name = "p_cart")
 @EntityListeners(AuditingEntityListener.class)
 public class CartEntity extends BaseEntity {
 

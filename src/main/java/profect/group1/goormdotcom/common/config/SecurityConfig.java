@@ -32,7 +32,7 @@ public class SecurityConfig {
                 // 익명사용자 비활성화
                 .anonymous(anon -> anon.disable())
                 // 세션기능 비활성화
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint(authenticationFailedEntryPoint)
                 )
