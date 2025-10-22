@@ -13,4 +13,13 @@ public enum Status {
     CANCEL("결제 취소");
 
     private final String description;
+
+    public static Status fromTossStatus(TossPaymentStatus s) {
+        return switch (s) {
+            case DONE -> SUCCESS;
+            case CANCELED, PARTIAL_CANCELED -> CANCEL;
+            case ABORTED -> FAIL;
+            case READY, IN_PROGRESS, WAITING_FOR_DEPOSIT -> PENDING;
+        };
+    }
 }

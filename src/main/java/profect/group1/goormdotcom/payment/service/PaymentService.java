@@ -11,6 +11,8 @@ import profect.group1.goormdotcom.payment.controller.dto.request.PaymentCancelRe
 import profect.group1.goormdotcom.payment.controller.dto.request.PaymentCreateRequestDto;
 import profect.group1.goormdotcom.payment.controller.dto.request.PaymentFailRequestDto;
 import profect.group1.goormdotcom.payment.controller.dto.request.PaymentSuccessRequestDto;
+import profect.group1.goormdotcom.payment.controller.dto.response.PaymentCancelResponseDto;
+import profect.group1.goormdotcom.payment.controller.dto.response.PaymentSuccessResponseDto;
 import profect.group1.goormdotcom.payment.domain.Payment;
 import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.repository.PaymentRepository;
@@ -19,6 +21,9 @@ import profect.group1.goormdotcom.payment.repository.mapper.PaymentMapper;
 import profect.group1.goormdotcom.user.domain.User;
 
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -67,11 +72,7 @@ public class PaymentService {
     }
 
     @Transactional
-    public Payment tossPaymentSuccess(PaymentSuccessRequestDto dto) {
-        System.out.println("[SUCCESS] raw dto.orderId='" + dto.getOrderId() + "'");
-        System.out.println("[SUCCESS] raw dto.amount=" + dto.getAmount());
-        System.out.println("[SUCCESS] raw dto.paymentKey=" + dto.getPaymentKey());
-
+    public PaymentSuccessResponseDto tossPaymentSuccess(PaymentSuccessRequestDto dto) {
         PaymentEntity paymentEntity = paymentRepository.findByOrderNumber(dto.getOrderId())
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
         if (!paymentEntity.getAmount().equals(dto.getAmount())) {
@@ -83,7 +84,7 @@ public class PaymentService {
         String authorizations = "Basic " + Base64.getEncoder().encodeToString((tossPaymentConfig.getSecretKey() + ":").getBytes());
 
         //TODO: RestClient로 바꾸는 것 고려
-        webClient.post()
+        PaymentSuccessResponseDto response = webClient.post()
                 .uri("https://api.tosspayments.com/v1/payments/confirm")
                 .header("Authorization", authorizations)
                 .header("Content-Type", "application/json")
@@ -93,13 +94,13 @@ public class PaymentService {
                         "amount", dto.getAmount()
                 ))
                 .retrieve()
-                .bodyToMono(String.class)
+                .bodyToMono(PaymentSuccessResponseDto.class)
                 .block();
 
         paymentEntity.setPaymentKey(dto.getPaymentKey());
         paymentEntity.setStatus(Status.SUCCESS);
 
-        return PaymentMapper.toDomain(paymentEntity);
+        return response;
     }
 
     @Transactional
@@ -108,6 +109,38 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
 
         paymentEntity.setStatus(Status.FAIL);
+    }
+
+    @Transactional
+    public PaymentCancelResponseDto tossPaymentCancel(PaymentCancelRequestDto dto, String paymentKey) {
+        PaymentEntity paymentEntity = paymentRepository.findByPaymentKey(paymentKey)
+                .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
+
+        WebClient webClient = WebClient.create(tossPaymentConfig.getConfirmUrl());
+
+        String authorizations = "Basic " + Base64.getEncoder().encodeToString((tossPaymentConfig.getSecretKey() + ":").getBytes());
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("cancelReason", dto.getCancelReason());
+        if (dto.getCancelAmount() != null) { //부분 최소
+            body.put("cancelAmount", dto.getCancelAmount());
+        }
+
+        //TODO: RestClient로 바꾸는 것 고려
+        PaymentCancelResponseDto response = webClient.post()
+                .uri(tossPaymentConfig.getConfirmUrl() + paymentKey + "/cancel")
+                .header("Authorization", authorizations)
+                .header("Content-Type", "application/json")
+                .header("Idempotency-Key", UUID.randomUUID().toString())
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(PaymentCancelResponseDto.class)
+                .block();
+
+        paymentEntity.setStatus(Status.CANCEL);
+
+        //TODO: 히스토리에 취소사유
+        return response;
     }
 
 }
