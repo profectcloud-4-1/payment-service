@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.status.SuccessStatus;
+import profect.group1.goormdotcom.product.controller.dto.ProductImageResponseDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductRequestDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
 import profect.group1.goormdotcom.product.controller.mapper.ProductDtoMapper;
@@ -101,4 +102,24 @@ public class ProductController implements ProductApiDocs {
         return ApiResponse.of(SuccessStatus._OK, productIds);
     }
     
+    // preesigned URL 및 image_id 반환
+    @PostMapping("/image")
+    @PreAuthorize("hasRole('SELLER')")
+    public ApiResponse<ProductImageResponseDto> uploadProductImage() {
+        UUID imageId = productService.uploadProductImages();
+
+        // TODO: presignedurl 발급
+        String presignedUrl = "";
+        return ApiResponse.of(SuccessStatus._OK, new ProductImageResponseDto(imageId, presignedUrl));
+    }
+    
+    @DeleteMapping("/image/{imageId}")
+    @PreAuthorize("hasRole('SELLER')")
+    public ApiResponse<UUID> deleteProductImage(
+        @PathVariable(value = "imageId") UUID imageId   
+    ) {
+        
+        productService.deleteProductImage(imageId);
+        return ApiResponse.of(SuccessStatus._OK, imageId);
+    }
 }

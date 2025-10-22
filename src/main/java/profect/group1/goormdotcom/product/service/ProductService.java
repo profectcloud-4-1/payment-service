@@ -71,12 +71,16 @@ public class ProductService {
         final UUID productId
     ) {
         productRepository.deleteById(productId);
+        List<ProductImageEntity> imageEntities = productImageRepository.findByProductId(productId);
+        List<UUID> imageIds = imageEntities.stream().map(ProductImageEntity::getId).toList();
+        deleteProductImages(imageIds);
     }
 
     public void deleteProducts(
         final List<UUID> productIds
     ) {
         productRepository.deleteAllById(productIds);
+        
     }
 
     public Product getProduct(
@@ -106,12 +110,11 @@ public class ProductService {
         return imageId;
     }
 
-    public List<UUID> deleteProductImages(
-        final UUID productId,
-        final List<UUID> imageIds,
-        final int imageCount
-    ) {
+    public void deleteProductImage(final UUID imageId) {
+        productImageRepository.deleteById(imageId);
+    }
+
+    public void deleteProductImages(final List<UUID> imageIds) {
         productImageRepository.deleteAllById(imageIds);
-        return imageIds;
     }
 }
