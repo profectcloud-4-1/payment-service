@@ -12,6 +12,8 @@ public interface CartService {
 
 	Cart addCartItem(UUID customerId, UUID productId, int quantity, int price);
 
+	Cart updateCartItem(UUID customerId, UUID cartItemId, int quantity);
+
 	Cart removeCartItem(UUID customerId, UUID cartItem);
 
 	Cart removeBulkItem(UUID CustomerId, List<UUID> cartItemIds);

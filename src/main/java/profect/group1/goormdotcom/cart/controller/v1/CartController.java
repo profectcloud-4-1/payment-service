@@ -21,6 +21,7 @@ import profect.group1.goormdotcom.cart.controller.dto.request.DeleteBulkCartItem
 import profect.group1.goormdotcom.cart.controller.dto.request.UpdateCartItemRequestDto;
 import profect.group1.goormdotcom.cart.controller.mapper.CartDtoMapper;
 import profect.group1.goormdotcom.cart.domain.Cart;
+import profect.group1.goormdotcom.cart.service.CartService;
 import profect.group1.goormdotcom.cart.service.CartServiceImpl;
 import profect.group1.goormdotcom.user.presentation.auth.LoginUser;
 
@@ -30,7 +31,7 @@ import profect.group1.goormdotcom.user.presentation.auth.LoginUser;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class CartController implements CartApiDocs {
 
-	private final CartServiceImpl cartService;
+	private final CartService cartService;
 
 	@GetMapping
 	public ApiResponse<CartResponseDto> getCart(
