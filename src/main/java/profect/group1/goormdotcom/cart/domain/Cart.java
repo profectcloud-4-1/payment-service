@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -116,7 +117,7 @@ public class Cart {
 	}
 
 	public List<CartItem> getItems() {
-		return Collections.unmodifiableList(items);
+		return new ArrayList<>(items);
 	}
 
 	public Cart withNewItem(final CartItem newCartItem) {
