@@ -1,11 +1,8 @@
-package profect.group1.goormdotcom.payment.controller.dto;
+package profect.group1.goormdotcom.payment.controller.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
 import profect.group1.goormdotcom.payment.domain.enums.PayType;
 import profect.group1.goormdotcom.payment.domain.enums.Status;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 
