@@ -6,7 +6,6 @@ import profect.group1.goormdotcom.cart.infrastructure.client.dto.UserResponseDto
 
 @FeignClient(
 		name = "user-service",
-		url = "${user.service.url}",
 		fallback = UserClientFallBack.class
 )
 public interface UserClient {

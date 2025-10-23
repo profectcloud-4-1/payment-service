@@ -23,7 +23,7 @@ import profect.group1.goormdotcom.cart.controller.mapper.CartDtoMapper;
 import profect.group1.goormdotcom.cart.domain.Cart;
 import profect.group1.goormdotcom.cart.service.CartService;
 import profect.group1.goormdotcom.cart.service.CartServiceImpl;
-import profect.group1.goormdotcom.user.presentation.auth.LoginUser;
+import profect.group1.goormdotcom.user.controller.auth.LoginUser;
 
 @Slf4j
 @RestController
