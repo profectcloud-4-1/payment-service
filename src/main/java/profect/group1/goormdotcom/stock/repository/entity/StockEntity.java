@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLDelete;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -26,6 +27,8 @@ public class StockEntity extends BaseEntity{
     
     @Id
     private UUID id;
+    
+    @Column(unique=true)
     private UUID productId;
     private int stockQuantity;
     private LocalDateTime deletedAt;
@@ -42,6 +45,18 @@ public class StockEntity extends BaseEntity{
 
     public void updateQuantity(int stockQuantity) {
         this.stockQuantity = stockQuantity;
+    }
+
+    public void decreaseStock(int requestedQuantity) {
+        if (this.stockQuantity - requestedQuantity < 0) {
+            throw new IllegalArgumentException("재고가 요청한 수량보다 부족합니다.");
+        }
+
+        this.stockQuantity -= requestedQuantity;
+    }
+
+    public void increaseStock(int requestedQuantity) {
+        this.stockQuantity += requestedQuantity;
     }
 
 }
