@@ -66,8 +66,8 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "approved_at", nullable = true)
     private LocalDateTime approvedAt;
 
-    @Column(name = "cancelled_at", nullable = true)
-    private LocalDateTime cancelledAt;
+    @Column(name = "canceled_at", nullable = true)
+    private LocalDateTime canceledAt;
 
     public PaymentEntity(final UUID userId,
                          final UUID orderId,
@@ -91,4 +91,8 @@ public class PaymentEntity extends BaseEntity {
     public void setCanceledAmount(Long canceledAmount) {
         this.canceledAmount = canceledAmount;
     }
+
+    public void setApprovedAt(LocalDateTime approvedAt) { this.approvedAt = approvedAt; }
+
+    public void setCanceledAt(LocalDateTime canceledAt) { this.canceledAt = canceledAt; }
 }

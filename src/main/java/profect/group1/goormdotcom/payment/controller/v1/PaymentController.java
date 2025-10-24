@@ -2,18 +2,17 @@ package profect.group1.goormdotcom.payment.controller.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
+import profect.group1.goormdotcom.payment.controller.dto.request.*;
 import profect.group1.goormdotcom.payment.controller.dto.response.PaymentCancelResponseDto;
 import profect.group1.goormdotcom.payment.controller.dto.response.PaymentResponseDto;
-import profect.group1.goormdotcom.payment.controller.dto.request.PaymentCancelRequestDto;
-import profect.group1.goormdotcom.payment.controller.dto.request.PaymentCreateRequestDto;
-import profect.group1.goormdotcom.payment.controller.dto.request.PaymentFailRequestDto;
-import profect.group1.goormdotcom.payment.controller.dto.request.PaymentSuccessRequestDto;
+import profect.group1.goormdotcom.payment.controller.dto.response.PaymentSearchResponseDto;
 import profect.group1.goormdotcom.payment.controller.dto.response.PaymentSuccessResponseDto;
 import profect.group1.goormdotcom.payment.controller.mapper.PaymentDtoMapper;
 import profect.group1.goormdotcom.payment.domain.Payment;
@@ -24,7 +23,7 @@ import profect.group1.goormdotcom.user.domain.enums.SellerApprovalStatus;
 import profect.group1.goormdotcom.user.domain.enums.UserRole;
 import profect.group1.goormdotcom.user.infra.UserJpaEntity;
 
-import java.awt.print.Pageable;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -46,7 +45,7 @@ public class PaymentController implements PaymentApiDocs {
                 .email("testuser@goorm.com")
                 .name("테스트유저")
                 .role(UserRole.CUSTOMER)
-                .password("encoded-password") // 실사용 X
+                .password("encoded-password") //실사용 X
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .sellerApprovalStatus(SellerApprovalStatus.PENDING)
@@ -84,4 +83,15 @@ public class PaymentController implements PaymentApiDocs {
         paymentService.tossPaymentCancel(paymentCancelRequestDto, paymentKey);
         return ApiResponse.onSuccess(new PaymentCancelResponseDto(paymentKey, Status.CANCEL_PENDING, List.of()));
     }
+
+    @Override
+    @GetMapping
+    //TODO: @AuthenticationPrincipal User user 추가
+    public ApiResponse<PaymentSearchResponseDto> searchPayment (@ModelAttribute PaymentSearchRequestDto paymentSearchRequestDto,
+                                                                Pageable pageable) {
+        //임시
+        UUID userId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        return ApiResponse.onSuccess(paymentService.search(userId, paymentSearchRequestDto, pageable));
+    }
+
 }

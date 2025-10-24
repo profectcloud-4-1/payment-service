@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-public class Payment {
+public class Payment extends BaseEntity {
 
     private UUID id;
     private UUID userId;
@@ -28,7 +28,7 @@ public class Payment {
     private Long canceledAmount;
     private String paymentKey;
     private LocalDateTime approvedAt;
-    private LocalDateTime cancelledAt;
+    private LocalDateTime canceledAt;
 
     public Payment(
             UUID userId,
@@ -67,9 +67,9 @@ public class Payment {
         this.approvedAt = approvedAt;
     }
 
-    public void markCancel(LocalDateTime cancelledAt) {
+    public void markCancel(LocalDateTime canceledAt) {
         this.status = Status.CANCEL;
-        this.cancelledAt = cancelledAt;
+        this.canceledAt = canceledAt;
     }
 
     public void markFail() {

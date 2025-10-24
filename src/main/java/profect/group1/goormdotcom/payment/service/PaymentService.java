@@ -4,17 +4,19 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.reactive.function.client.WebClient;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
 import profect.group1.goormdotcom.apiPayload.exceptions.handler.PaymentHandler;
-import profect.group1.goormdotcom.common.security.SecurityUtil;
 import profect.group1.goormdotcom.payment.config.TossPaymentConfig;
 import profect.group1.goormdotcom.payment.controller.dto.request.*;
 import profect.group1.goormdotcom.payment.controller.dto.response.PaymentCancelResponseDto;
+import profect.group1.goormdotcom.payment.controller.dto.response.PaymentSearchResponseDto;
 import profect.group1.goormdotcom.payment.controller.dto.response.PaymentSuccessResponseDto;
 import profect.group1.goormdotcom.payment.controller.mapper.PaymentDtoMapper;
 import profect.group1.goormdotcom.payment.domain.Payment;
@@ -24,14 +26,11 @@ import profect.group1.goormdotcom.payment.repository.PaymentRepository;
 import profect.group1.goormdotcom.payment.repository.entity.PaymentEntity;
 import profect.group1.goormdotcom.payment.repository.mapper.PaymentMapper;
 import profect.group1.goormdotcom.user.domain.User;
-import org.springframework.transaction.annotation.Propagation;
 
-import java.time.Duration;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeoutException;
+import org.springframework.data.domain.Pageable;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 
 import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
@@ -121,8 +120,19 @@ public class PaymentService {
                 .bodyToMono(PaymentSuccessResponseDto.class)
                 .block();
 
+        LocalDateTime approvedAt = null;
+        if (response != null && response.approvedAt() != null) {
+            approvedAt = response.approvedAt()
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        } else {
+            approvedAt = LocalDateTime.now();
+        }
         paymentEntity.setPaymentKey(dto.getPaymentKey());
         paymentEntity.setStatus(Status.SUCCESS);
+        paymentEntity.setApprovedAt(response.approvedAt().toLocalDateTime());
+
 
         //TODO: 히스토리 상태를 성공으로 변경
         //실패 시 histrory 실패로 변경..
@@ -215,7 +225,7 @@ public class PaymentService {
             }
 
             //DB 업데이트 (별도 트랜잭션 메서드 호출)
-            updatePaymentCancelStatus(event.paymentId(), lastCancel.cancelAmount());
+            updatePaymentCancelStatus(event.paymentId(), lastCancel.cancelAmount(), lastCancel.canceledAt().toLocalDateTime());
 
         } catch (Exception e) {
             //예외 발생 시 Toss 상태 재조회로 동기화 시도
@@ -225,7 +235,8 @@ public class PaymentService {
         //TODO: 히스토리에 취소사유 등록
     }
 
-    public void updatePaymentCancelStatus(UUID paymentId, Long canceledAmount) {
+    @Transactional
+    public void updatePaymentCancelStatus(UUID paymentId, Long canceledAmount, LocalDateTime canceledAt) {
         PaymentEntity paymentEntity = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
 
@@ -240,6 +251,7 @@ public class PaymentService {
         boolean isPartial = newCanceledAmount < paymentEntity.getAmount();
         paymentEntity.setCanceledAmount(newCanceledAmount);
         paymentEntity.setStatus(isPartial ? Status.PARTIAL_CANCEL : Status.CANCEL);
+        paymentEntity.setCanceledAt(canceledAt);
 
         paymentRepository.saveAndFlush(paymentEntity);
     }
@@ -273,5 +285,44 @@ public class PaymentService {
         long canceledSoFar = payment.getCanceledAmount() != null ?
                 payment.getCanceledAmount() : 0L;
         return totalAmount - canceledSoFar;
+    }
+
+    public PaymentSearchResponseDto search(UUID userId, PaymentSearchRequestDto requestDto, Pageable pageable) {
+        Slice<PaymentEntity> slice = paymentRepository.findAllByUserId(
+                userId,
+                PageRequest.of(
+                        pageable.getPageNumber(),
+                        pageable.getPageSize(),
+                        Sort.Direction.DESC,
+                        "id"
+                )
+        );
+
+        List<Payment> filtered = slice.getContent().stream()
+                .map(PaymentMapper::toDomain)
+                .filter(p -> requestDto.getStatus() == null || p.getStatus() == requestDto.getStatus())
+                .filter(p -> {
+                    LocalDateTime base = p.getCanceledAt() != null ? p.getCanceledAt()
+                            : p.getApprovedAt() != null ? p.getApprovedAt()
+                            : p.getCreatedAt();
+
+                    return (requestDto.getFromAt() == null || !base.isBefore(requestDto.getFromAt()))
+                            && (requestDto.getToAt() == null || !base.isAfter(requestDto.getToAt()));
+                })
+                .filter(p -> requestDto.getMinAmount() == null || p.getAmount() >= requestDto.getMinAmount())
+                .filter(p -> requestDto.getMaxAmount() == null || p.getAmount() <= requestDto.getMaxAmount())
+                .toList();
+
+        List<PaymentSearchResponseDto.Item> items = PaymentDtoMapper.toSearchItemList(filtered);
+
+        return new PaymentSearchResponseDto(
+                items,
+                new PaymentSearchResponseDto.Pagination(
+                        slice.getNumber(),
+                        slice.getSize(),
+                        slice.hasNext(),
+                        !slice.hasNext()
+                )
+        );
     }
 }

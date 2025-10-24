@@ -23,7 +23,7 @@ public class PaymentMapper {
                 entity.getCanceledAmount(),
                 entity.getPaymentKey(),
                 entity.getApprovedAt(),
-                entity.getCancelledAt()
+                entity.getCanceledAt()
         );
     }
 
@@ -40,7 +40,7 @@ public class PaymentMapper {
                 payment.getCanceledAmount(),
                 payment.getPaymentKey(),
                 payment.getApprovedAt(),
-                payment.getCancelledAt()
+                payment.getCanceledAt()
         );
     }
 
