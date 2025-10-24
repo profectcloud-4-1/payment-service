@@ -14,7 +14,7 @@ import java.util.UUID;
  * - 재고 차감
  * - 재고 복구
  */
-@FeignClient(name = "stock-service", url = "${stock.service.url}")
+@FeignClient(name = "stock-service")
 public interface StockClient {
 
     /**

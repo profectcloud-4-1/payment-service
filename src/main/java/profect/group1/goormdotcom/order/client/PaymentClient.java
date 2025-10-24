@@ -11,7 +11,7 @@ import java.util.UUID;
  * - 결제 정보 조회
  * - 결제 취소
  */
-@FeignClient(name = "payment-service", url = "${payment.service.url}")
+@FeignClient(name = "payment-service")
 public interface PaymentClient {
 
     /**

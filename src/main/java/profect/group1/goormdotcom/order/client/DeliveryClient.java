@@ -14,7 +14,7 @@ import java.util.UUID;
  * - 배송 상태 조회
  * - 배송 취소/반송 요청
  */
-@FeignClient(name = "delivery-service", url = "${delivery.service.url}")
+@FeignClient(name = "delivery-service")
 public interface DeliveryClient {
 
     /**
