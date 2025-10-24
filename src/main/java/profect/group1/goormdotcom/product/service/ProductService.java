@@ -1,7 +1,5 @@
 package profect.group1.goormdotcom.product.service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -9,7 +7,11 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.product.domain.Product;
+import profect.group1.goormdotcom.product.infrastructure.client.StockClient;
+import profect.group1.goormdotcom.product.infrastructure.client.dto.StockRequestDto;
+import profect.group1.goormdotcom.product.infrastructure.client.dto.StockResponseDto;
 import profect.group1.goormdotcom.product.repository.ProductImageRepository;
 import profect.group1.goormdotcom.product.repository.ProductRepository;
 import profect.group1.goormdotcom.product.repository.entity.ProductEntity;
@@ -23,12 +25,14 @@ public class ProductService {
     
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
+    private final StockClient stockClient;
 
     public UUID createProduct(
         final UUID brandId,
         final UUID categoryId,
         final String productName,
         final int price,
+        final int stockQuantity,
         final String description
     ) {
         final UUID productId = UUID.randomUUID();
@@ -41,6 +45,11 @@ public class ProductService {
             price, 
             description
         );
+
+        // TODO: Register stockQuantity
+        StockRequestDto stockRequestDto = new StockRequestDto(productId, stockQuantity);
+        ApiResponse<StockResponseDto> response = stockClient.registerStock(stockRequestDto);
+        StockResponseDto stockResponseDto = response.getResult();
         
         productRepository.save(productEntity);
             
@@ -53,6 +62,7 @@ public class ProductService {
         final UUID categoryId,
         final String productName,
         final int price,
+        final int stockQuantity,
         final String description
     ) {
         ProductEntity productEntity = productRepository.findById(productId)
@@ -61,6 +71,10 @@ public class ProductService {
         ProductEntity newProductEntity = new ProductEntity(
             productId, productEntity.getBrandId(), categoryId, productName, price, description
         );
+
+        // TODO: Update stockQuantity
+        ApiResponse<StockResponseDto> response = stockClient.updateStock(productId, stockQuantity);
+        StockResponseDto stockResponseDto = response.getResult();
 
         productRepository.save(newProductEntity);
         
@@ -100,12 +114,8 @@ public class ProductService {
         productImageRepository.saveAll(productImageEntities);
     }
 
-    public UUID uploadProductImages() { 
+    public UUID uploadProductImage() { 
         UUID imageId = UUID.randomUUID();
-
-        // TODO: Implement presignedURL
-        // 
-    
 
         return imageId;
     }

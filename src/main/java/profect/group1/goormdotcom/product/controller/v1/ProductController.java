@@ -45,11 +45,9 @@ public class ProductController implements ProductApiDocs {
             request.categoryId(), 
             request.name(), 
             request.price(), 
+            request.stockQuantity(),
             request.description()
-        ); 
-        
-        // TODO: Register stockQuantity
-
+        );
 
         // 이미지 저장
         productService.createProductImages(request.imageIds(), productId);
@@ -76,10 +74,9 @@ public class ProductController implements ProductApiDocs {
             request.categoryId(),
             request.name(),
             request.price(),
+            request.stockQuantity(),
             request.description()
         );
-
-        // TODO: Update stockQuantity
         
         return ApiResponse.of(SuccessStatus._OK, ProductDtoMapper.toProductResponseDto(product));
     }
@@ -106,7 +103,7 @@ public class ProductController implements ProductApiDocs {
     @PostMapping("/image")
     @PreAuthorize("hasRole('SELLER')")
     public ApiResponse<ProductImageResponseDto> uploadProductImage() {
-        UUID imageId = productService.uploadProductImages();
+        UUID imageId = productService.uploadProductImage();
 
         // TODO: presignedurl 발급
         String presignedUrl = "";
