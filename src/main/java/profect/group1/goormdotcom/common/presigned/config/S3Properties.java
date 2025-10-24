@@ -20,6 +20,8 @@ public class S3Properties {
         private String bucket;
         private String region;
         private String endpoint;
+        private String accessKey;
+        private String secretKey;
     }
 
     @Getter
