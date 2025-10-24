@@ -6,6 +6,8 @@ import profect.group1.goormdotcom.order.controller.dto.OrderRequestDto;
 import profect.group1.goormdotcom.order.controller.dto.OrderResponseDto;
 import profect.group1.goormdotcom.order.domain.Order;
 import profect.group1.goormdotcom.order.repository.entity.OrderEntity;
+import profect.group1.goormdotcom.order.repository.entity.OrderStatusEntity;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,15 +15,22 @@ import java.util.UUID;
 public class OrderDtoMapper {
 
     /*Entitly + 현재 상태(code/name) -> response Dto */
-    public static OrderResponseDto toResponseDto(OrderEntity entity, String statusCode, String statusName){
+    public static OrderResponseDto toResponseDto(OrderEntity entity, OrderStatusEntity current) {
+        String statusCode = null;
+        String statusLabel = null;
+
+        if (current != null && current.getStatus() != null) {
+            statusCode = current.getStatus().getCodeKey();
+            statusLabel = current.getStatus().getVisibleLabel();
+        }
         return OrderResponseDto.builder()
         .id(entity.getId())
         .customerId(entity.getCustomerId())
         .sellerId(entity.getSellerId())
         // .orderDate(entity.getCreatedAt())
         .totalAmount(entity.getTotalAmount())
-        // .currentStatuscode(StatusCode) // 주문 상태 코드 (추후에 변수 수정 예정) -> 상태 테이블 만들어서 관리
-        // .currentStatusName(StatusName) // 주문 상태 명(추후에 변수 수정 예정) -> 상태 테이블 만들어서 관리
+        .statusCode(statusCode) // 주문 상태 코드 (추후에 변수 수정 예정) -> 상태 테이블 만들어서 관리
+        .statusLabel(statusLabel) // 주문 상태 명(추후에 변수 수정 예정) -> 상태 테이블 만들어서 관리
         .createdAt(entity.getCreatedAt())
         .updatedAt(entity.getUpdatedAt())
         .deletedAt(entity.getDeletedAt())
@@ -34,8 +43,8 @@ public class OrderDtoMapper {
                 .id(UUID.randomUUID())
                 .customerId(req.getCustomerId())
                 .sellerId(req.getSellerId())
-                .productId(req.getProductId())
-                .quantity(req.getQuantity())
+                // .productId(req.getProductId())
+                // .quantity(req.getQuantity())
                 .createdAt(now)
                 .updatedAt(now)
                 .totalAmount(req.getTotalAmount())

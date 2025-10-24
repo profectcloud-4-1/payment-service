@@ -16,14 +16,19 @@ import lombok.*;
 public class CommonCodeEntity {
     
     @Id
+    @Column(length = 100, nullable = false)
     private String code;
 
-    @Column(name = "code_group", nullable = false, length = 100)
-    private String codeGroup;
+    @Column(name = "code_key", nullable = false, length = 100)
+    private String codeKey;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "code_value", nullable = false, length = 100)
+    private String codeValue;
+
+    @Column(name= "visible_label", nullable = false, length = 100)
+    private String visibleLabel;
+    
+    @Column(name= "description", nullable = false, length = 255)
     private String description;
 
-    @Column(nullable = false, length = 100)
-    private String label;
 }

@@ -18,8 +18,8 @@ public class OrderRequestDto {
     @NotNull
     private UUID productId;
 
-    @Min(1)
-    private int quantity;
+    // @Min(1)
+    // private int quantity;
 
     @Min(0)
     private int totalAmount;

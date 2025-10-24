@@ -9,7 +9,7 @@ import profect.group1.goormdotcom.order.repository.entity.CommonCodeEntity;
 
 // 새로운 Erd 생성 할건지 말건지 기록용 History(order)
 @Entity
-@Table(name = "order_status")
+@Table(name = "p_order_status")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -19,14 +19,16 @@ public class OrderStatusEntity {
     @Id
     private UUID id;
 
+    
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_name", nullable = false)
     private OrderEntity order;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "status_id", nullable = false)
+    @JoinColumn(name = "status_code", nullable = false)
     private CommonCodeEntity status; // ORDER_STATUS 그룹의 코드
 
     @Column(nullable = false)
-    private LocalDateTime createdAt; // 상태 전이 시각
+    private LocalDateTime updatedAt; // 상태 전이 시각
 }
