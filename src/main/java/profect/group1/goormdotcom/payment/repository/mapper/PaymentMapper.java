@@ -19,6 +19,7 @@ public class PaymentMapper {
                 entity.getPayType(),
                 entity.getStatus(),
                 entity.getAmount(),
+                entity.getCanceledAmount(),
                 entity.getPaymentKey(),
                 entity.getApprovedAt(),
                 entity.getCancelledAt()
@@ -34,6 +35,7 @@ public class PaymentMapper {
                 payment.getPayType(),
                 payment.getStatus(),
                 payment.getAmount(),
+                payment.getCanceledAmount(),
                 payment.getPaymentKey(),
                 payment.getApprovedAt(),
                 payment.getCancelledAt()

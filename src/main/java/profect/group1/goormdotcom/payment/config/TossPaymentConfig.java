@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class TossPaymentConfig {
     @Value("${payment.toss.client_api_key}")
     private String clientApiKey;
-    @Value("${payment.toss.secrete_api_key}")
+    @Value("${payment.toss.secret_api_key}")
     private String secretKey;
     @Value("${payment.toss.success_url}")
     private String successUrl;

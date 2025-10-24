@@ -9,14 +9,13 @@ import java.util.UUID;
 
 public record PaymentCancelResponseDto (
         String paymentKey,
-        String orderId,
-        String status,
+        Status status,
         List<CancelEntry> cancels
 ) {
     public record CancelEntry(
-            Integer cancelAmount,            //취소 금액
+            Long cancelAmount,            //취소 금액
             String cancelReason,             //취소 사유
-            Integer refundableAmount,        //남은 환불 가능 금액
+            Long refundableAmount,        //남은 환불 가능 금액
             OffsetDateTime canceledAt,       //취소 시각
             String transactionKey,           //거래 키
             String cancelStatus              //취소 상태

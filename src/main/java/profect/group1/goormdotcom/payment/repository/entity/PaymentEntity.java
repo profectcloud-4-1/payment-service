@@ -53,9 +53,11 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "amount", nullable = false)
     private Long amount;
 
+    @Column(name = "canceled_amount", nullable = false)
+    private Long canceledAmount;
+
     @Column(name = "payment_key", length = 200, nullable = true)
     private String paymentKey;
-
 
     @Column(name = "approved_at", nullable = true)
     private LocalDateTime approvedAt;
@@ -78,5 +80,9 @@ public class PaymentEntity extends BaseEntity {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public void setCanceledAmount(Long canceledAmount) {
+        this.canceledAmount = canceledAmount;
     }
 }

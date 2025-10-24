@@ -12,5 +12,5 @@ import java.util.UUID;
 public class PaymentCancelRequestDto {
     private String cancelReason;
     //전액 취소면 필요 X
-    private String cancelAmount;
+    private Long cancelAmount;
 }

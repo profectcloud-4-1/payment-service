@@ -24,6 +24,7 @@ public class Payment {
     private PayType payType;
     private Status status;
     private Long amount;
+    private Long canceledAmount;
     private String paymentKey;
     private LocalDateTime approvedAt;
     private LocalDateTime cancelledAt;
@@ -40,6 +41,7 @@ public class Payment {
         this.orderName = orderName;
         this.payType = payType;
         this.amount = amount;
+        this.canceledAmount = (long) 0;
         this.status = Status.PENDING;
     }
 
