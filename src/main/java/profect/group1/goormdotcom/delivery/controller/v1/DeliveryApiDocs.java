@@ -16,10 +16,24 @@ import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.delivery.controller.dto.request.CreateAddressRequestDto;
 import profect.group1.goormdotcom.delivery.controller.dto.response.CustomerAddressListResponseDto;
 import profect.group1.goormdotcom.delivery.domain.DeliveryAddress;
+import profect.group1.goormdotcom.delivery.controller.dto.request.CreateDeliveryRequestDto;
+import profect.group1.goormdotcom.delivery.controller.dto.request.CancelDeliveryRequestDto;
+import profect.group1.goormdotcom.delivery.domain.Delivery;
 
 @Tag(name = "Delivery", description = "배송 관리 API")
 public interface DeliveryApiDocs {
 
+    @Operation(summary = "반송 가능 여부 확인", description = "반송 가능 여부를 확인합니다.")
+    ApiResponse<Integer> checkCancellable(@RequestParam UUID orderId);
+
+    @Operation(summary = "배송 요청")
+    ApiResponse<Delivery> createDelivery(@RequestBody CreateDeliveryRequestDto body);
+
+    @Operation(summary = "배송 취소")
+    ApiResponse<Object> cancelDelivery(@RequestBody CancelDeliveryRequestDto body);
+
+    @Operation(summary = "반송 요청")
+    ApiResponse<Object> returnDelivery(@RequestBody CancelDeliveryRequestDto body);
 
     @Operation(summary = "내 배송지 목록 조회", security = { @SecurityRequirement(name = "bearerAuth") })
     ApiResponse<CustomerAddressListResponseDto> getMyAddresses(HttpServletRequest request);
