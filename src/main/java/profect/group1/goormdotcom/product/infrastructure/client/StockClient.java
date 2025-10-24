@@ -14,6 +14,7 @@ import java.util.UUID;
 
 @FeignClient(
     name = "stock-service",
+    url = "${stock.service.url}",
     fallback = StockClientFallback.class,
     configuration = FeignConfig.class
 )

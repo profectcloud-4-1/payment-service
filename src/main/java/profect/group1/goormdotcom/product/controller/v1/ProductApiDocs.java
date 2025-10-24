@@ -14,6 +14,7 @@ import java.util.UUID;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.product.controller.dto.ProductRequestDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
+import profect.group1.goormdotcom.product.controller.dto.UpdateProductRequestDto;
 
 @Tag(name = "Product", description = "상품 API")
 public interface ProductApiDocs {
@@ -44,7 +45,7 @@ public interface ProductApiDocs {
     )
     ApiResponse<ProductResponseDto> updateProduct(
         @Parameter(description = "상품 ID") UUID productId,
-        @RequestBody ProductRequestDto request
+        @RequestBody UpdateProductRequestDto request
     );
 
     @Operation(summary = "상품 삭제", description = "SELLER 전용", security = { @SecurityRequirement(name = "bearerAuth") })

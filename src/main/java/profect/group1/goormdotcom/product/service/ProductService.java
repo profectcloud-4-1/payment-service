@@ -49,6 +49,8 @@ public class ProductService {
         // TODO: Register stockQuantity
         StockRequestDto stockRequestDto = new StockRequestDto(productId, stockQuantity);
         ApiResponse<StockResponseDto> response = stockClient.registerStock(stockRequestDto);
+        System.out.println(response);
+        System.out.println(response.getResult());
         StockResponseDto stockResponseDto = response.getResult();
         
         productRepository.save(productEntity);
@@ -62,7 +64,6 @@ public class ProductService {
         final UUID categoryId,
         final String productName,
         final int price,
-        final int stockQuantity,
         final String description
     ) {
         ProductEntity productEntity = productRepository.findById(productId)
@@ -71,10 +72,6 @@ public class ProductService {
         ProductEntity newProductEntity = new ProductEntity(
             productId, productEntity.getBrandId(), categoryId, productName, price, description
         );
-
-        // TODO: Update stockQuantity
-        ApiResponse<StockResponseDto> response = stockClient.updateStock(productId, stockQuantity);
-        StockResponseDto stockResponseDto = response.getResult();
 
         productRepository.save(newProductEntity);
         

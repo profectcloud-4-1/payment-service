@@ -12,6 +12,7 @@ import profect.group1.goormdotcom.apiPayload.code.status.SuccessStatus;
 import profect.group1.goormdotcom.product.controller.dto.ProductImageResponseDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductRequestDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
+import profect.group1.goormdotcom.product.controller.dto.UpdateProductRequestDto;
 import profect.group1.goormdotcom.product.controller.mapper.ProductDtoMapper;
 import profect.group1.goormdotcom.product.domain.Product;
 import profect.group1.goormdotcom.product.service.ProductService;
@@ -67,14 +68,13 @@ public class ProductController implements ProductApiDocs {
     @PreAuthorize("hasRole('SELLER')")
     public ApiResponse<ProductResponseDto> updateProduct(
         @PathVariable(value = "productId") UUID productId, 
-        @RequestBody @Valid ProductRequestDto request
+        @RequestBody @Valid UpdateProductRequestDto request
     ) {
         Product product = productService.updateProduct(
             productId,
             request.categoryId(),
             request.name(),
             request.price(),
-            request.stockQuantity(),
             request.description()
         );
         
