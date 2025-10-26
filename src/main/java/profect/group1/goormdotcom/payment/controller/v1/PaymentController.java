@@ -19,9 +19,8 @@ import profect.group1.goormdotcom.payment.domain.Payment;
 import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.service.PaymentService;
 import profect.group1.goormdotcom.user.domain.User;
-import profect.group1.goormdotcom.user.domain.enums.SellerApprovalStatus;
 import profect.group1.goormdotcom.user.domain.enums.UserRole;
-import profect.group1.goormdotcom.user.infra.UserJpaEntity;
+import profect.group1.goormdotcom.user.infrastructure.UserJpaEntity;
 
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
@@ -48,7 +47,6 @@ public class PaymentController implements PaymentApiDocs {
                 .password("encoded-password") //실사용 X
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .sellerApprovalStatus(SellerApprovalStatus.PENDING)
                 .build();
 
         //임시 매퍼
