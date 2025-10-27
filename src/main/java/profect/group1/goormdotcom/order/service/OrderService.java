@@ -64,18 +64,18 @@ public class OrderService {
         log.info("주문 생성 시작: customerId={}, itemCount={}", req.getCustomerId(), req.getItems().size());
 
         //재고 확인 테스트트
-        if (stockCheckEnabled) {
-            for (OrderItemDto item : req.getItems()) {
-                Boolean stockAvailable = stockClient.checkStock(item.getProductId(), item.getQuantity());
-                if (!stockAvailable) {
-                    log.warn("재고 부족: productId={}", item.getProductId());
-                    throw new IllegalStateException("재고가 부족합니다.");
-                }
-            }
-            log.info("재고 확인 완료");
-        } else {
-            log.info("[DEV] 재고 확인 생략됨됨");
-        }
+        // if (stockCheckEnabled) {
+        //     for (OrderItemDto item : req.getItems()) {
+        //         Boolean stockAvailable = stockClient.checkStock(item.getProductId(), item.getQuantity());
+        //         if (!stockAvailable) {
+        //             log.warn("재고 부족: productId={}", item.getProductId());
+        //             throw new IllegalStateException("재고가 부족합니다.");
+        //         }
+        //     }
+        //     log.info("재고 확인 완료");
+        // } else {
+        //     log.info("[DEV] 재고 확인 생략됨됨");
+        // }
         //재고 확인 api
         // for (OrderItemDto item : req.getItems()) {
         //     Boolean stockAvailable = stockClient.checkStock(item.getProductId(), item.getQuantity());
@@ -144,44 +144,39 @@ public class OrderService {
         log.info("결제 완료 처리 시작: orderId={}, paymentId={}", orderId, paymentId);
 
         OrderEntity order = findOrderOrThrow(orderId);
-        //실제 결제 완료 처리 요청청
-        // Boolean paymentVerified = paymentClient.verifyPayment(
-        //     new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
-        // );
-        // if (!paymentVerified) {
-        //     appendOrderStatus(orderId, OrderStatus.CANCELLED);
-        //     throw new IllegalStateException("결제 실패");
-        // }
-        // log.info("결제 완료: orderId={}, paymentID={}", orderId, paymentId);
+        실제 결제 완료 처리 요청청
+        Boolean paymentVerified = paymentClient.verifyPayment(
+            new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
+        );
+        if (!paymentVerified) {
+            appendOrderStatus(orderId, OrderStatus.CANCELLED);
+            throw new IllegalStateException("결제 실패");
+        }
+        log.info("결제 완료: orderId={}, paymentID={}", orderId, paymentId);
 
         //결제 완료 테스트트
-        Boolean paymentVerified = true;
-        if (paymentCheckEnabled) {
-            paymentVerified = paymentClient.verifyPayment(
-                new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
-            );
-            if (!paymentVerified) {
-                appendOrderStatus(orderId, OrderStatus.CANCELLED);
-                throw new IllegalStateException("결제 실패");
-            }
-        } else {
-            log.info("[DEV] 결제 확인 생략됨");
-        }
-            // 재고 차감(실제 재고 확정)
-        OrderProductEntity product = orderProductRepository.findAll().stream()
-        .filter(p -> p.getOrder().getId().equals(orderId))
-        .findFirst()
-        .orElseThrow(() -> new IllegalStateException("주문 상품을 찾을 수 없습니다."));
+        // Boolean paymentVerified = true;
+        // if (paymentCheckEnabled) {
+        //     paymentVerified = paymentClient.verifyPayment(
+        //         new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
+        //     );
+        //     if (!paymentVerified) {
+        //         appendOrderStatus(orderId, OrderStatus.CANCELLED);
+        //         throw new IllegalStateException("결제 실패");
+        //     }
+        // } else {
+        //     log.info("[DEV] 결제 확인 생략됨");
+        // }
         
-        Boolean stockDecreased = stockClient.decreaseStock(product.getProductId(), product.getQuantity());
-        if (!stockDecreased) {
-            log.error("재고 차감 실패: orderId={}, productId={}", orderId, product.getProductId());
-            appendOrderStatus(orderId, OrderStatus.CANCELLED);
-            throw new IllegalStateException("재고 차감에 실패했습니다.");
-        }
-        log.info("재고 차감 완료: orderId={}", orderId);
+        // Boolean stockDecreased = stockClient.decreaseStock(product.getProductId(), product.getQuantity());
+        // if (!stockDecreased) {
+        //     log.error("재고 차감 실패: orderId={}, productId={}", orderId, product.getProductId());
+        //     appendOrderStatus(orderId, OrderStatus.CANCELLED);
+        //     throw new IllegalStateException("재고 차감에 실패했습니다.");
+        // }
+        // log.info("재고 차감 완료: orderId={}", orderId);
 
-        log.info("재고 차감 완료: orderId={}", orderId);
+        // log.info("재고 차감 완료: orderId={}", orderId);
 
         //배송 요청
         // Boolean deliveryRequested = deliveryClient.requestDelivery(
@@ -197,32 +192,32 @@ public class OrderService {
 
 //--------------------------------
 
-        //배송 요청 테스트
-        Boolean deliveryRequested = true;
-        if (deliveryCheckEnabled) {
-            deliveryRequested = deliveryClient.requestDelivery(
-                new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
-            );
-            if (!deliveryRequested) {
-                log.error("배송 요청 실패: orderId={}", orderId);
-                appendOrderStatus(orderId, OrderStatus.CANCELLED);
-                throw new IllegalStateException("배송 요청에 실패했습니다.");
-            }
-            log.info("배송 요청 완료: orderId={}", orderId);
-        } else {
-            log.info("[DEV] 배송 요청 생략됨");
-        }
-        //배송 요청
-        // Boolean deliveryRequested = deliveryClient.requestDelivery(
-        //     new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
-        // );
-
-        // if (!deliveryRequested) {
-        //     log.error("배송 요청 실패: orderId={}", orderId);
-        //     appendOrderStatus(orderId, OrderStatus.CANCELLED);
-        //     throw new IllegalStateException("배송 요청에 실패했습니다.");
+        // //배송 요청 테스트
+        // Boolean deliveryRequested = true;
+        // if (deliveryCheckEnabled) {
+        //     deliveryRequested = deliveryClient.requestDelivery(
+        //         new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
+        //     );
+        //     if (!deliveryRequested) {
+        //         log.error("배송 요청 실패: orderId={}", orderId);
+        //         appendOrderStatus(orderId, OrderStatus.CANCELLED);
+        //         throw new IllegalStateException("배송 요청에 실패했습니다.");
+        //     }
+        //     log.info("배송 요청 완료: orderId={}", orderId);
+        // } else {
+        //     log.info("[DEV] 배송 요청 생략됨");
         // }
-        // log.info("배송 요청 완료: orderId={}", orderId);
+        // 배송 요청
+        Boolean deliveryRequested = deliveryClient.requestDelivery(
+            new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
+        );
+
+        if (!deliveryRequested) {
+            log.error("배송 요청 실패: orderId={}", orderId);
+            appendOrderStatus(orderId, OrderStatus.CANCELLED);
+            throw new IllegalStateException("배송 요청에 실패했습니다.");
+        }
+        log.info("배송 요청 완료: orderId={}", orderId);
 
         // 주문 상태 업데이트       
         appendOrderStatus(orderId, OrderStatus.COMPLETED);
