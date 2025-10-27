@@ -60,22 +60,10 @@ public class OrderService {
 
     // 1) 주문 생성: 재고 선차감(예약) + 주문(PENDING) -> 주문 완료 하면 
     // 재고 확인 먼저
+    @Transactional
     public Order create(OrderRequestDto req) {
         log.info("주문 생성 시작: customerId={}, itemCount={}", req.getCustomerId(), req.getItems().size());
 
-        //재고 확인 테스트트
-        // if (stockCheckEnabled) {
-        //     for (OrderItemDto item : req.getItems()) {
-        //         Boolean stockAvailable = stockClient.checkStock(item.getProductId(), item.getQuantity());
-        //         if (!stockAvailable) {
-        //             log.warn("재고 부족: productId={}", item.getProductId());
-        //             throw new IllegalStateException("재고가 부족합니다.");
-        //         }
-        //     }
-        //     log.info("재고 확인 완료");
-        // } else {
-        //     log.info("[DEV] 재고 확인 생략됨됨");
-        // }
         //재고 확인 api
         // for (OrderItemDto item : req.getItems()) {
         //     Boolean stockAvailable = stockClient.checkStock(item.getProductId(), item.getQuantity());
@@ -86,44 +74,63 @@ public class OrderService {
         // }
         // log.info("재고 확인 완료");
 
-        // 주문 엔터티 생성
-        OrderEntity order = orderRepository.save(
-            OrderEntity.builder()
-                .id(UUID.randomUUID())
-                .customerId(req.getCustomerId())
-                .sellerId(req.getSellerId())
-                // // .orderName(req.getOrderName())
-                .totalAmount(req.getTotalAmount())
-                // .orderDate(LocalDateTime.now())
-                // .currentCode(ORD0001) // 초기 상태: 대기
-                .build()
-        );
         // 아이템 저장
+
+        OrderEntity orderEntity = OrderEntity.builder()
+                        .id(UUID.randomUUID())
+                        .customerId(req.getCustomerId())
+                        .sellerId(req.getSellerId())
+                        .totalAmount(req.getTotalAmount())
+                        .orderName("주문명")
+                        .build();
+
+        orderRepository.save(orderEntity);
+
+        
+
+
+
         List<OrderProductEntity> lines = new ArrayList<>();
         for (OrderItemDto itemDto : req.getItems()) {
             String productName = (req.getOrderName() != null && !req.getOrderName().isBlank())
                     ? req.getOrderName() : "상품";
                     
-            OrderProductEntity line = orderProductRepository.save(
-                OrderProductEntity.builder()
-                    .id(UUID.randomUUID())
-                    .order(order)
-                    .productId(itemDto.getProductId())
-                    .productName(productName)
-                    .quantity(itemDto.getQuantity())
-                    .totalAmount(req.getTotalAmount() / req.getItems().size())
-                    .build()
-            );
+            OrderProductEntity line = OrderProductEntity.builder()
+                .id(UUID.randomUUID())
+                .productId(itemDto.getProductId())
+                .productName(productName)
+                .quantity(itemDto.getQuantity())
+                .totalAmount(req.getTotalAmount() / req.getItems().size())
+                .build();
             lines.add(line);
         }
-        // 주문명 생성
-        String orderName = OrderNameFormatter.makeOrderName(lines);
-
-        order = order.toBuilder()
-            .orderName(orderName)
-            .build();
-
-        OrderEntity saved = orderRepository.save(order);
+        
+        // 주문 엔터티 생성 (아이템이 있어야 주문명 생성 가능)
+        OrderEntity order = orderRepository.save(
+            OrderEntity.builder()
+                .id(UUID.randomUUID())
+                .customerId(req.getCustomerId())
+                .sellerId(req.getSellerId())
+                .totalAmount(req.getTotalAmount())
+                .orderName(OrderNameFormatter.makeOrderName(lines))
+                .build()
+        );
+        
+        // 아이템에 order 연결 후 저장
+        for (OrderProductEntity line : lines) {
+            OrderProductEntity lineWithOrder = OrderProductEntity.builder()
+                .id(line.getId())
+                .order(order)
+                .productId(line.getProductId())
+                .productName(line.getProductName())
+                .quantity(line.getQuantity())
+                .totalAmount(line.getTotalAmount())
+                .build();
+            orderProductRepository.save(lineWithOrder);
+        }
+        
+        // OrderEntity를 다시 조회해서 반환
+        OrderEntity saved = orderRepository.findById(order.getId()).orElse(order);
 
         //PENDING 상태
         appendOrderStatus(saved.getId(), OrderStatus.PENDING);
@@ -144,7 +151,7 @@ public class OrderService {
         log.info("결제 완료 처리 시작: orderId={}, paymentId={}", orderId, paymentId);
 
         OrderEntity order = findOrderOrThrow(orderId);
-        실제 결제 완료 처리 요청청
+        // 실제 결제 완료 처리 요청청
         Boolean paymentVerified = paymentClient.verifyPayment(
             new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
         );
