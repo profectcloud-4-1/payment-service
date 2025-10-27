@@ -20,16 +20,22 @@ public class ProductMapper {
             entity.getCreatedAt(), 
             entity.getUpdatedAt(), 
             entity.getDeletedAt(), 
-            imageEntities.stream().map(ProductMapper::toDomain).toList()
+            imageEntities.stream().map(ProductImageMapper::toDomain).toList()
         );
     }
 
-    public static ProductImage toDomain(ProductImageEntity entity) {
-        return new ProductImage(
-            entity.getId(),
-            entity.getProductId(),
-            entity.getImageObject(),
-            entity.getDeletedAt()
+    public static Product toDomainWithImage(ProductEntity entity, List<ProductImage> images) {
+        return new Product(
+            entity.getId(), 
+            entity.getBrandId(), 
+            entity.getCategoryId(), 
+            entity.getName(), 
+            entity.getDescription(), 
+            entity.getPrice(),
+            entity.getCreatedAt(), 
+            entity.getUpdatedAt(), 
+            entity.getDeletedAt(), 
+            images
         );
     }
 }

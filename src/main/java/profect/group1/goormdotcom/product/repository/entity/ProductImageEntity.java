@@ -29,7 +29,6 @@ public class ProductImageEntity{
     @Id
     private UUID id;
     private UUID productId;
-    private String imageObject;
     private LocalDateTime deletedAt;
 
     public ProductImageEntity(

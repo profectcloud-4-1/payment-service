@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.product.infrastructure.client;
+package profect.group1.goormdotcom.product.infrastructure.client.StockService;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.common.config.FeignConfig;
-import profect.group1.goormdotcom.product.infrastructure.client.dto.StockRequestDto;
-import profect.group1.goormdotcom.product.infrastructure.client.dto.StockResponseDto;
+import profect.group1.goormdotcom.product.infrastructure.client.StockService.dto.StockRequestDto;
+import profect.group1.goormdotcom.product.infrastructure.client.StockService.dto.StockResponseDto;
+
 import java.util.UUID;
 
 @FeignClient(
     name = "stock-service",
-    url = "${stock.service.url}",
+    url = "http://localhost:8080",
     fallback = StockClientFallback.class,
     configuration = FeignConfig.class
 )

@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.product.infrastructure.client;
+package profect.group1.goormdotcom.product.infrastructure.client.StockService;
 
 import org.springframework.stereotype.Component;
 
@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 import lombok.extern.slf4j.Slf4j;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
-import profect.group1.goormdotcom.product.infrastructure.client.dto.StockRequestDto;
-import profect.group1.goormdotcom.product.infrastructure.client.dto.StockResponseDto;
+import profect.group1.goormdotcom.product.infrastructure.client.StockService.dto.StockRequestDto;
+import profect.group1.goormdotcom.product.infrastructure.client.StockService.dto.StockResponseDto;
+
 import java.util.UUID;
 
 @Slf4j

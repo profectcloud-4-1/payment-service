@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.product.infrastructure.client.dto;
+package profect.group1.goormdotcom.product.infrastructure.client.StockService.dto;
 
 import java.util.UUID;
 

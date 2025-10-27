@@ -18,9 +18,7 @@ public class ProductDtoMapper {
             product.getCategoryId(), 
             product.getDescription(),
             product.getPrice(), 
-            // TODO: url로 제공. 현재는 imageId string으로 제공
-            product.getImages().stream().map(ProductImage::getId).toList()
-                            .stream().map(UUID::toString).toList()
+            product.getImages().stream().map(ProductImage::getImageUrl).toList()
         );
     }
 }

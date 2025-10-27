@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.status.SuccessStatus;
 import profect.group1.goormdotcom.product.controller.dto.DeleteProductRequestDto;
-import profect.group1.goormdotcom.product.controller.dto.ProductImageResponseDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductRequestDto;
 import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
 import profect.group1.goormdotcom.product.controller.dto.UpdateProductRequestDto;
@@ -48,11 +47,9 @@ public class ProductController implements ProductApiDocs {
             request.name(), 
             request.price(), 
             request.stockQuantity(),
-            request.description()
+            request.description(),
+            request.imageIds()
         );
-
-        // 이미지 저장
-        productService.createProductImages(request.imageIds(), productId);
         
         return ApiResponse.of(SuccessStatus._OK, productId);
     }
@@ -77,7 +74,8 @@ public class ProductController implements ProductApiDocs {
             request.categoryId(),
             request.name(),
             request.price(),
-            request.description()
+            request.description(),
+            request.imageIds()
         );
         
         return ApiResponse.of(SuccessStatus._OK, ProductDtoMapper.toProductResponseDto(product));
@@ -102,17 +100,7 @@ public class ProductController implements ProductApiDocs {
         return ApiResponse.of(SuccessStatus._OK, request.productIds());
     }
     
-    // preesigned URL 및 image_id 반환
-    @PostMapping("/image")
-    @PreAuthorize("hasRole('SELLER')")
-    public ApiResponse<ProductImageResponseDto> uploadProductImage() {
-        UUID imageId = productService.uploadProductImage();
-
-        // TODO: presignedurl 발급
-        String presignedUrl = "";
-        return ApiResponse.of(SuccessStatus._OK, new ProductImageResponseDto(imageId, presignedUrl));
-    }
-    
+    // 이미지 삭제 요청 (soft delete 처리)
     @DeleteMapping("/image/{imageId}")
     @PreAuthorize("hasRole('SELLER')")
     public ApiResponse<UUID> deleteProductImage(
