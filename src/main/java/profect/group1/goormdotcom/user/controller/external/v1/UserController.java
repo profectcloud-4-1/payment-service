@@ -1,16 +1,14 @@
-package profect.group1.goormdotcom.user.controller;
+package profect.group1.goormdotcom.user.controller.external.v1;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import profect.group1.goormdotcom.user.service.UserService;
-import profect.group1.goormdotcom.user.controller.dto.request.RegisterRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.response.MeResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.request.ListRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.response.ListResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.response.RegisterResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.request.EditRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.request.LoginRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.response.LoginResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.RegisterRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.MeResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.RegisterResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.EditRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.LoginRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.LoginResponseDto;
 import profect.group1.goormdotcom.user.service.dto.CreateUserDto;
 import profect.group1.goormdotcom.user.domain.User;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
@@ -27,9 +25,9 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.AccessLevel;
 import profect.group1.goormdotcom.user.controller.auth.LoginUser;
-import profect.group1.goormdotcom.user.controller.dto.response.UserAddressListResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.UserAddressListResponseDto;
 import profect.group1.goormdotcom.user.domain.UserAddress;
-import profect.group1.goormdotcom.user.controller.dto.request.UserAddressRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.UserAddressRequestDto;
 import profect.group1.goormdotcom.user.service.UserAddressService;
 
 @RestController

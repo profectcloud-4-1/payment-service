@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.user.controller.dto.response;
+package profect.group1.goormdotcom.user.controller.external.v1.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

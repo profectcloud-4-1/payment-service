@@ -3,7 +3,7 @@ package profect.group1.goormdotcom.user.service;
 import java.util.UUID;
 import java.util.List;
 import profect.group1.goormdotcom.user.domain.UserAddress;
-import profect.group1.goormdotcom.user.controller.dto.request.UserAddressRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.UserAddressRequestDto;
 import profect.group1.goormdotcom.user.repository.UserAddressRepository;
 import profect.group1.goormdotcom.user.domain.mapper.UserAddressMapper;
 import org.springframework.stereotype.Service;

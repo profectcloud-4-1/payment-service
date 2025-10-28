@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.user.controller.dto.request;
+package profect.group1.goormdotcom.user.controller.external.v1.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;

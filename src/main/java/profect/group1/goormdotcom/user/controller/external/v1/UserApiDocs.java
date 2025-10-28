@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.user.controller;
+package profect.group1.goormdotcom.user.controller.external.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,16 +10,16 @@ import java.util.UUID;
 import profect.group1.goormdotcom.user.controller.auth.LoginUser;
 
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
-import profect.group1.goormdotcom.user.controller.dto.request.EditRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.request.ListRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.request.LoginRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.request.RegisterRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.response.ListResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.response.LoginResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.response.MeResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.response.RegisterResponseDto;
-import profect.group1.goormdotcom.user.controller.dto.request.UserAddressRequestDto;
-import profect.group1.goormdotcom.user.controller.dto.response.UserAddressListResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.EditRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.ListRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.LoginRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.RegisterRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.ListResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.LoginResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.MeResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.RegisterResponseDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.request.UserAddressRequestDto;
+import profect.group1.goormdotcom.user.controller.external.v1.dto.response.UserAddressListResponseDto;
 import profect.group1.goormdotcom.user.domain.UserAddress;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
