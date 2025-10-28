@@ -62,36 +62,24 @@ public class StockService {
     }
 
     @Transactional
-    public Boolean decreaseStocks(Map<UUID, Integer> requestedQuantityMap) {
+    public void decreaseStocks(Map<UUID, Integer> requestedQuantityMap) {
         StockEntity entity;
         for (UUID productId: requestedQuantityMap.keySet()) {
             entity = getStockEntity(productId);
             entity.decreaseQuantity(requestedQuantityMap.get(productId));
             
-            // TODO: 동시성 제어 구현 (낙관적 락 및 재확인 구현)
-            try {
-                stockRepository.save(entity);
-            } catch (Exception e) {
-                return false;
-            }
+            stockRepository.save(entity);
         }
-        return true;
     }
 
     @Transactional
-    public Boolean increaseStocks(Map<UUID, Integer> requestedQuantityMap) {
+    public void increaseStocks(Map<UUID, Integer> requestedQuantityMap) {
         StockEntity entity;
         for (UUID productId: requestedQuantityMap.keySet()) {
             entity = getStockEntity(productId);
             entity.increaseQuantity(requestedQuantityMap.get(productId));
             
-            // TODO: 동시성 제어 구현 (낙관적 락 및 재확인 구현)
-            try {
-                stockRepository.save(entity);
-            } catch (Exception e) {
-                return false;
-            }
+            stockRepository.save(entity);   
         }
-        return true;
     }
 }

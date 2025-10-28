@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import profect.group1.goormdotcom.stock.config.RetryConfig;
 import profect.group1.goormdotcom.stock.controller.dto.ProductStockAdjustmentRequestDto;
 import profect.group1.goormdotcom.stock.controller.dto.StockAdjustmentRequestDto;
 import profect.group1.goormdotcom.stock.controller.dto.StockAdjustmentResponseDto;
@@ -12,8 +14,10 @@ import profect.group1.goormdotcom.stock.controller.dto.StockRequestDto;
 import profect.group1.goormdotcom.stock.controller.dto.StockResponseDto;
 import profect.group1.goormdotcom.stock.controller.mapper.StockDtoMapper;
 import profect.group1.goormdotcom.stock.domain.Stock;
+import profect.group1.goormdotcom.stock.domain.exception.InsufficientStockException;
 import profect.group1.goormdotcom.stock.service.StockService;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
+import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
 import profect.group1.goormdotcom.apiPayload.code.status.SuccessStatus;
 
 import java.util.Map;
@@ -25,6 +29,8 @@ import java.util.UUID;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.hibernate.StaleObjectStateException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,9 +40,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RestController
 @RequestMapping("/api/v1/stock")
 @RequiredArgsConstructor
+@Slf4j
 public class StockController implements StockApiDocs {
 
     private final StockService stockService;
+    private final RetryConfig retryConfig;
 
     @PostMapping
     @PreAuthorize("hasRole('MASTER')")
@@ -84,10 +92,39 @@ public class StockController implements StockApiDocs {
         for (ProductStockAdjustmentRequestDto dto : stockAdjustmentRequestDto.products()) {
             requestedQuantityMap.put(dto.productId(), dto.requestedStockQuantity());
         }
+        int retryCount = 0;
 
-        // TODO: 재시도 로직 필요
-        Boolean status = stockService.decreaseStocks(requestedQuantityMap);
-        return ApiResponse.of(SuccessStatus._OK, new StockAdjustmentResponseDto(status, new ArrayList<UUID>(requestedQuantityMap.keySet())));
+        while (true) {
+            try {                
+                stockService.decreaseStocks(requestedQuantityMap);
+                break;
+            } catch (InsufficientStockException e) {
+                return ApiResponse.onFailure(ErrorStatus._INSUFFICIENT_STOCK_QUANTITY.getCode() , ErrorStatus._INSUFFICIENT_STOCK_QUANTITY.getMessage(), new StockAdjustmentResponseDto(false, new ArrayList<UUID>(requestedQuantityMap.keySet())));
+            } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e ) {
+                // 재시도 로직
+                retryCount += 1;
+                if (retryCount > retryConfig.maxRetries()) { 
+                    log.error("재고 변경 실패");
+                    return ApiResponse.onFailure(
+                        ErrorStatus._ADJUST_STOCK_FAILED.getCode() , 
+                        ErrorStatus._ADJUST_STOCK_FAILED.getMessage(), 
+                        new StockAdjustmentResponseDto(false, new ArrayList<UUID>(requestedQuantityMap.keySet()))
+                    );
+                }
+
+                // 백오프
+                try {
+                    Thread.sleep(retryConfig.baseOffMs());
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return ApiResponse.onFailure(ErrorStatus._CONFLICT.getCode(), "Interrupted",
+                        new StockAdjustmentResponseDto(false, new ArrayList<>(requestedQuantityMap.keySet())));
+                }
+            } 
+        }
+        return ApiResponse.of(SuccessStatus._OK, new StockAdjustmentResponseDto(true, new ArrayList<UUID>(requestedQuantityMap.keySet())));
+        
+        
     }
 
     @PostMapping("/increase")
@@ -99,8 +136,36 @@ public class StockController implements StockApiDocs {
             requestedQuantityMap.put(dto.productId(), dto.requestedStockQuantity());
         }
 
-        Boolean status = stockService.increaseStocks(requestedQuantityMap);
-        return ApiResponse.of(SuccessStatus._OK, new StockAdjustmentResponseDto(status, new ArrayList<UUID>(requestedQuantityMap.keySet())));
+        int retryCount = 0;
+
+        while (true) {
+            try {                
+                stockService.increaseStocks(requestedQuantityMap);
+                break;
+            } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e ) {
+                // 재시도 로직
+                retryCount += 1;
+                
+                if (retryCount > retryConfig.maxRetries()) { 
+                    log.error("재고 변경 실패");
+                    return ApiResponse.onFailure(
+                        ErrorStatus._ADJUST_STOCK_FAILED.getCode(), 
+                        ErrorStatus._ADJUST_STOCK_FAILED.getMessage(), 
+                        new StockAdjustmentResponseDto(false, new ArrayList<UUID>(requestedQuantityMap.keySet()))
+                    );
+                }
+
+                // 백오프
+                try {
+                    Thread.sleep(retryConfig.baseOffMs());
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return ApiResponse.onFailure(ErrorStatus._CONFLICT.getCode(), "Interrupted",
+                        new StockAdjustmentResponseDto(false, new ArrayList<>(requestedQuantityMap.keySet())));
+                }
+            } 
+        }
+        return ApiResponse.of(SuccessStatus._OK, new StockAdjustmentResponseDto(true, new ArrayList<UUID>(requestedQuantityMap.keySet())));
     }
     
 }

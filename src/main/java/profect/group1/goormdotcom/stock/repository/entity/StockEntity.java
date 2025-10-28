@@ -11,11 +11,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import profect.group1.goormdotcom.common.domain.BaseEntity;
+import profect.group1.goormdotcom.stock.domain.exception.InsufficientStockException;
 
 @Getter
 @AllArgsConstructor
@@ -29,6 +31,9 @@ public class StockEntity extends BaseEntity{
     
     @Id
     private UUID id;
+
+    @Version
+    private long version;
     
     @Column(name = "product_id", unique=true)
     private UUID productId;
@@ -53,7 +58,7 @@ public class StockEntity extends BaseEntity{
 
     public void decreaseQuantity(int requestedQuantity) {
         if (this.stockQuantity - requestedQuantity < 0) {
-            throw new IllegalArgumentException("현재 재고가 요청한 수량보다 부족합니다.");
+            throw new InsufficientStockException();
         }
 
         this.stockQuantity -= requestedQuantity;
