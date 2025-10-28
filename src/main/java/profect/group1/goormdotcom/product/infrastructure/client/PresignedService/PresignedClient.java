@@ -12,7 +12,7 @@ import profect.group1.goormdotcom.common.config.FeignConfig;
 import profect.group1.goormdotcom.product.infrastructure.client.PresignedService.dto.ObjectKeyResponse;
 
 @FeignClient(
-    name = "presigned-service",
+    name = "product-to-presigned",
     fallback = PresignedClientFallback.class,
     configuration = FeignConfig.class
 )

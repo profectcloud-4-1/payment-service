@@ -9,7 +9,7 @@ import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentResul
 import java.util.UUID;
 
 @FeignClient(
-        name = "order-service",
+        name = "payment-to-order",
         fallback = OrderClientFallBack.class
 )
 public interface OrderClient {

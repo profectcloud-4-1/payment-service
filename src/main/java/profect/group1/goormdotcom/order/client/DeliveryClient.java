@@ -15,7 +15,7 @@ import profect.group1.goormdotcom.apiPayload.ApiResponse;
  * - 배송 상태 조회
  * - 배송 취소/반송 요청
  */
-@FeignClient(name = "delivery-service")
+@FeignClient(name = "order-to-delivery")
 public interface DeliveryClient {
 
     // /**

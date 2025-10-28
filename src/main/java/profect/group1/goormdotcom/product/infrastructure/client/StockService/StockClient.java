@@ -14,7 +14,7 @@ import profect.group1.goormdotcom.product.infrastructure.client.StockService.dto
 import java.util.UUID;
 
 @FeignClient(
-    name = "stock-service",
+    name = "product-to-stock",
     fallback = StockClientFallback.class,
     configuration = FeignConfig.class
 )
