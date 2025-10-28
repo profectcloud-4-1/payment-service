@@ -1,7 +1,5 @@
 package profect.group1.goormdotcom.stock.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -9,8 +7,6 @@ import java.util.UUID;
 import org.hibernate.StaleObjectStateException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.UnexpectedRollbackException;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -72,11 +68,10 @@ public class StockService {
     }
     
     @Transactional
-    public AdjustStockStatus decreaseStocks(Map<UUID, Integer> requestedQuantityMap) {
+    public Boolean decreaseStocks(Map<UUID, Integer> requestedQuantityMap) {
         StockEntity entity;
         for (UUID productId: requestedQuantityMap.keySet()) {
             int retryCount = 0;
-            
             
             while (true) {
                 try {
@@ -84,29 +79,29 @@ public class StockService {
                     adjustStockService.tryDecreaseQuantity(entity, requestedQuantityMap.get(productId));
                     break;
                 } catch (InsufficientStockException e) {
-                    return AdjustStockStatus.INSUFFICIENT;
+                    throw e;
                 } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
-                    log.info("재고 차감 실패");
                     retryCount += 1;
 
                     if (retryCount > retryConfig.maxRetries()) {
-                        return AdjustStockStatus.FAILED;
+                        log.info("재고 차감 실패");
+                        throw e;
                     }
 
                     try {
                         Thread.sleep(retryConfig.baseOffMs());
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
-                        return AdjustStockStatus.INTERRUPT;
+                        return false;
                     }
                 }
             }
         }
-        return AdjustStockStatus.SUCCESS;
+        return true;
     }
 
     @Transactional
-    public AdjustStockStatus increaseStocks(Map<UUID, Integer> requestedQuantityMap) {
+    public Boolean increaseStocks(Map<UUID, Integer> requestedQuantityMap) {
         StockEntity entity;
         for (UUID productId: requestedQuantityMap.keySet()) {
             int retryCount = 0;
@@ -117,22 +112,23 @@ public class StockService {
                     adjustStockService.tryIncreaseQuantity(entity, requestedQuantityMap.get(productId));
                     break;
                 } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
-                    log.info("재고 차감 실패");
                     retryCount += 1;
 
                     if (retryCount > retryConfig.maxRetries()) {
-                        return AdjustStockStatus.FAILED;
+                        log.info("재고 증가 실패");
+                        // return AdjustStockStatus.FAILED;
+                        throw e;
                     }
 
                     try {
                         Thread.sleep(retryConfig.baseOffMs());
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
-                        return AdjustStockStatus.INTERRUPT;
+                        return false;
                     }
                 }
             }
         }
-        return AdjustStockStatus.SUCCESS;
+        return true;
     }
 }
