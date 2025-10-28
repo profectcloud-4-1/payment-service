@@ -29,29 +29,6 @@ import java.util.UUID;
 
 @Tag(name = "결제 관리", description = "결제 관련 API")
 public interface PaymentApiDocs {
-    @Operation(
-            summary = "결제 요청 API",
-            description = "사용자가 주문에 대해 결제를 요청하면 새로운 결제가 생성되고 상태는 PENDING으로 설정됩니다."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "성공입니다"),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "유효하지 않은 요청 (예: 1000원 미만 결제)",
-                    content = @Content(schema = @Schema(implementation = profect.group1.goormdotcom.apiPayload.ApiResponse.class))
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "인증 실패",
-                    content = @Content(schema = @Schema(implementation = profect.group1.goormdotcom.apiPayload.ApiResponse.class))
-            )
-
-
-    })
-    profect.group1.goormdotcom.apiPayload.ApiResponse<PaymentResponseDto> requestPayment(
-            //TODO: @AuthenticationPrincipal User user,
-            @RequestBody @Valid PaymentCreateRequestDto paymentRequestDto
-    );
 
     @Operation(
             summary = "결제 성공 리디렉션 API",

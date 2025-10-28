@@ -23,9 +23,4 @@ public class RegisterRequestDto {
     @Schema(description = "비밀번호")
     @NotBlank
     private String password;
-    @Schema(description = "역할. MASTER, SELLER, CUSTOMER")
-    @NotNull
-    private UserRole role;
-    @Schema(description = "소속 브랜드 ID")
-    private String brandId;
 }

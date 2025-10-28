@@ -18,9 +18,6 @@ import profect.group1.goormdotcom.payment.controller.mapper.PaymentDtoMapper;
 import profect.group1.goormdotcom.payment.domain.Payment;
 import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.service.PaymentService;
-import profect.group1.goormdotcom.user.domain.User;
-import profect.group1.goormdotcom.user.domain.enums.UserRole;
-import profect.group1.goormdotcom.user.infrastructure.UserJpaEntity;
 
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
@@ -32,34 +29,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/payments")
 public class PaymentController implements PaymentApiDocs {
     private final PaymentService paymentService;
-
-    @Override
-    @PostMapping
-    //@PreAuthorize()
-    //TODO: @AuthenticationPrincipal User user 추가
-    public ApiResponse<PaymentResponseDto> requestPayment(@RequestBody @Valid PaymentCreateRequestDto paymentRequestDto) {
-        //개발용 임시 유저
-        UserJpaEntity tempJpaUser = UserJpaEntity.builder()
-                .id(UUID.fromString("11111111-1111-1111-1111-111111111111")) // 임시 UUID
-                .email("testuser@goorm.com")
-                .name("테스트유저")
-                .role(UserRole.CUSTOMER)
-                .password("encoded-password") //실사용 X
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
-
-        //임시 매퍼
-        User user = User.builder()
-                .id(tempJpaUser.getId())
-                .name(tempJpaUser.getName())
-                .email(tempJpaUser.getEmail())
-                .role(tempJpaUser.getRole())
-                .build();
-
-        Payment payment = paymentService.requestPayment(paymentRequestDto, user);
-        return ApiResponse.onSuccess(PaymentDtoMapper.toPaymentDto(payment));
-    }
 
     @Override
     @GetMapping("/toss/success")

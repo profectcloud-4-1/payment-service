@@ -27,13 +27,18 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.AccessLevel;
 import profect.group1.goormdotcom.user.controller.auth.LoginUser;
+import profect.group1.goormdotcom.user.controller.dto.response.UserAddressListResponseDto;
+import profect.group1.goormdotcom.user.domain.UserAddress;
+import profect.group1.goormdotcom.user.controller.dto.request.UserAddressRequestDto;
+import profect.group1.goormdotcom.user.service.UserAddressService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserController implements UserApiDocs {
     
     private final UserService service;
+    private final UserAddressService userAddressService;
 
     @PostMapping("/register")
     public ApiResponse<RegisterResponseDto> register(@RequestBody RegisterRequestDto body) {
@@ -41,8 +46,6 @@ public class UserController implements UserApiDocs {
             .name(body.getName())
             .email(body.getEmail())
             .password(body.getPassword())
-            .role(body.getRole())
-            .brandId(body.getBrandId())
             .build();
 
         try {
@@ -121,15 +124,45 @@ public class UserController implements UserApiDocs {
 
     @GetMapping("/me")
     public ApiResponse<MeResponseDto> me(@LoginUser UUID userId) {
-        User user = service.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User user = service.findById(userId);
 
         return ApiResponse.onSuccess(MeResponseDto.of(user));
     }
 
-    @GetMapping
-    @PreAuthorize("hasRole('MASTER')")
-    public ApiResponse<ListResponseDto> users(ListRequestDto body) {
-        List<User> users = service.findAllBy(body);
-        return ApiResponse.onSuccess(ListResponseDto.of(users));
+    @PostMapping("/addresses")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ApiResponse<UUID> createAddress(@LoginUser UUID userId, @RequestBody UserAddressRequestDto body) {
+        UserAddress address = userAddressService.createUserAddress(userId, body);
+        return ApiResponse.onSuccess(address.getId());
     }
+
+    @PutMapping("/addresses/{addressId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ApiResponse<UUID> updateAddress(@LoginUser UUID userId, @PathVariable UUID addressId, @RequestBody UserAddressRequestDto body) {
+        UserAddress address = userAddressService.updateUserAddress(addressId, body);
+        return ApiResponse.onSuccess(addressId);
+    }
+
+    @DeleteMapping("/addresses/{addressId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ApiResponse<Boolean> deleteAddress(@LoginUser UUID userId, @PathVariable UUID addressId) {
+        boolean result = userAddressService.deleteUserAddress(addressId);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @GetMapping("/addresses")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ApiResponse<UserAddressListResponseDto> getAddresses(@LoginUser UUID userId) {
+        List<UserAddress> addresses = userAddressService.getAllByUserId(userId);
+        return ApiResponse.onSuccess(new UserAddressListResponseDto(addresses));
+    }
+
+    @GetMapping("/addresses/{addressId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ApiResponse<UserAddress> getAddress(@LoginUser UUID userId, @PathVariable UUID addressId) {
+        UserAddress address = userAddressService.getById(addressId);
+        return ApiResponse.onSuccess(address);
+    }
+
+
 }

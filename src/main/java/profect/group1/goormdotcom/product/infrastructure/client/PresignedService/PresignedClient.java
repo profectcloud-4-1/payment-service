@@ -13,7 +13,6 @@ import profect.group1.goormdotcom.product.infrastructure.client.PresignedService
 
 @FeignClient(
     name = "presigned-service",
-    url = "${spring.cloud.openfeign.client.config.presigned-service.url}",
     fallback = PresignedClientFallback.class,
     configuration = FeignConfig.class
 )

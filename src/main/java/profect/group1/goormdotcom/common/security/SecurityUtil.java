@@ -42,10 +42,6 @@ public final class SecurityUtil {
         return hasRole(UserRole.MASTER);
     }
 
-    public static boolean isSeller() {
-        return hasRole(UserRole.SELLER);
-    }
-
     public static boolean isCustomer() {
         return hasRole(UserRole.CUSTOMER);
 

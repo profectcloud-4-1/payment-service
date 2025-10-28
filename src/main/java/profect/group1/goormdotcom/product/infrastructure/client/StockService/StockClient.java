@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @FeignClient(
     name = "stock-service",
-    url = "${spring.cloud.openfeign.client.config.stock-service.url}",
     fallback = StockClientFallback.class,
     configuration = FeignConfig.class
 )

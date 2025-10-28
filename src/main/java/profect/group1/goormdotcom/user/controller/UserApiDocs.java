@@ -18,6 +18,9 @@ import profect.group1.goormdotcom.user.controller.dto.response.ListResponseDto;
 import profect.group1.goormdotcom.user.controller.dto.response.LoginResponseDto;
 import profect.group1.goormdotcom.user.controller.dto.response.MeResponseDto;
 import profect.group1.goormdotcom.user.controller.dto.response.RegisterResponseDto;
+import profect.group1.goormdotcom.user.controller.dto.request.UserAddressRequestDto;
+import profect.group1.goormdotcom.user.controller.dto.response.UserAddressListResponseDto;
+import profect.group1.goormdotcom.user.domain.UserAddress;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 
@@ -57,6 +60,18 @@ public interface UserApiDocs {
     @Operation(summary = "내 정보 조회", security = { @SecurityRequirement(name = "bearerAuth") })
 	ApiResponse<MeResponseDto> me(@LoginUser UUID userId);
 
-	@Operation(summary = "사용자 목록 조회", description = "검색/필터/정렬 가능", security = { @SecurityRequirement(name = "bearerAuth") })
-	ApiResponse<ListResponseDto> users(@ParameterObject ListRequestDto body);
+	@Operation(summary = "배송지 생성", security = { @SecurityRequirement(name = "bearerAuth") })
+	ApiResponse<UUID> createAddress(@LoginUser UUID userId, @RequestBody UserAddressRequestDto body);
+
+	@Operation(summary = "배송지 수정", security = { @SecurityRequirement(name = "bearerAuth") })
+	ApiResponse<UUID> updateAddress(@LoginUser UUID userId, @PathVariable UUID addressId, @RequestBody UserAddressRequestDto body);
+
+	@Operation(summary = "배송지 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
+	ApiResponse<Boolean> deleteAddress(@LoginUser UUID userId, @PathVariable UUID addressId);
+
+	@Operation(summary = "배송지 목록 조회", security = { @SecurityRequirement(name = "bearerAuth") })
+	ApiResponse<UserAddressListResponseDto> getAddresses(@LoginUser UUID userId);
+
+	@Operation(summary = "배송지 단건 조회", security = { @SecurityRequirement(name = "bearerAuth") })
+	ApiResponse<UserAddress> getAddress(@LoginUser UUID userId, @PathVariable UUID addressId);
 }
