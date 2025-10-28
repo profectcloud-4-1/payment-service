@@ -33,14 +33,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.completePayment(orderId));
     }
     
-    //배송 전 취소 (반품)
-    @PostMapping("/{orderId}/delivery-before")
+    //배송 전 취소 (환불)
+    @PostMapping("/{orderId}/cancel/delivery-before")
     public ResponseEntity<Order> deliveryBefore(@PathVariable UUID orderId) {
         return ResponseEntity.ok(orderService.delieveryBefore(orderId));
     }
 
     //배송 후 취소 (반송)
-    @PostMapping("/{orderId}/cancel")
+    @PostMapping("/{orderId}/cancel/return")
     public ResponseEntity<Order> cancel(@PathVariable UUID orderId) {
         return ResponseEntity.ok(orderService.cancel(orderId));
     }

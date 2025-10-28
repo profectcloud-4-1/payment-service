@@ -53,16 +53,20 @@ public interface DeliveryClient {
      * @param orderId 주문 ID
      * @return 취소 성공 여부
      */
-    @PostMapping("/internal/v1/delivery/cancel/{orderId}")
-    Boolean cancelDelivery(@PathVariable("orderId") UUID orderId);
+    @PostMapping("/internal/v1/delivery/cancel")
+    Boolean cancelDelivery(@RequestBody CancelDeliveryRequest request);
 
     /**
      * 반송 요청 (배송 완료 후 취소)
      * @param orderId 주문 ID
      * @return 반송 요청 성공 여부
      */
-    @PostMapping("/internal/v1/delivery/return/{orderId}")
-    Boolean requestReturn(@PathVariable("orderId") UUID orderId);
+    @PostMapping("/internal/v1/delivery/return")
+    Boolean requestReturn(@RequestBody ReturnDeliveryRequest request);
+
+    // 취소가능여부 확인
+    @GetMapping("/internal/v1/delivery/check/cancellable")
+    ApiResponse<Integer> checkCancellable(@RequestParam("orderId") UUID orderId);
 
     /**
      * 배송 요청 DTO
@@ -77,6 +81,7 @@ public interface DeliveryClient {
         String name,
         String deliveryMemo
     ) {}
+
 
     /**
      * 배송 상태 응답 DTO
@@ -97,4 +102,12 @@ public interface DeliveryClient {
         // RETURNED,       // 반송 완료
         CANCELLED       // 취소됨
     }
+
+    record CancelDeliveryRequest(
+        UUID orderId
+    ) {}
+    
+    record ReturnDeliveryRequest(
+        UUID orderId
+    ) {}
 }

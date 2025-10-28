@@ -162,12 +162,16 @@ public class OrderService {
     public Order delieveryBefore(UUID orderId) {
         log.info("취소 처리 시작: orderId={}", orderId);
         
-        OrderEntity order = findOrderOrThrow(orderId);
-        DeliveryClient.DeliveryStatusResponse deliveryStatus = deliveryClient.getDeliveryStatus(orderId);
-        if (deliveryStatus.status() != DeliveryClient.DeliveryStatus.PENDING) {
-            log.error("배송 준비 중이 아님: orderId={}", orderId);
-            throw new IllegalStateException("배송 준비 중이 아닙니다.");
+        OrderEntity orderEntity = findOrderOrThrow(orderId);
+
+
+        // 취소 가능여부 확인
+        ApiResponse<Integer> cancellableResponse = deliveryClient.checkCancellable(orderId);
+        if (cancellableResponse.getResult() != 1) {
+            log.error("취소 불가능: orderId={}", orderId);
+            throw new IllegalStateException("취소 불가능합니다.");
         }
+
         
         //결제 취소 요청
         Boolean cancelPayment = paymentClient.cancelPayment(
@@ -194,35 +198,30 @@ public class OrderService {
         log.info("재고 복구 완료: orderId={}", orderId);
 
         //배송 취소 요청
-        Boolean cancelDelivery = deliveryClient.cancelDelivery(orderId);
-        if(!cancelDelivery) {
-            log.error("배송 취소 요청 실패: orderId={}", orderId);
-            throw new IllegalStateException("배송 취소 요청에 실패했습니다.");
-        }
+        deliveryClient.cancelDelivery(new DeliveryClient.CancelDeliveryRequest(orderId));
+
+
         log.info("배송 취소 완료: orderId={}", orderId);
         // 상태 업데이트
         appendOrderStatus(orderId, OrderStatus.CANCELLED);
         log.info("주문 취소 처리 완료: orderId={}", orderId);
-        return orderMapper.toDomain(order);
+        return orderMapper.toDomain(orderEntity);
     }
 
     // 취소 로직(반송)
     public Order cancel(UUID orderId) {
         OrderEntity order = findOrderOrThrow(orderId);
 
-        //배송 상태 확인
-        DeliveryClient.DeliveryStatusResponse deliveryStatus = deliveryClient.getDeliveryStatus(orderId);
-        if (deliveryStatus.status() != DeliveryClient.DeliveryStatus.FINISHED) {
-            log.error("배송 완료 전: orderId={}, status={}", orderId, deliveryStatus.status());
-            throw new IllegalStateException("배송 완료 후에만 취소 가능합니다. 현재 상태: " + deliveryStatus.status());
+        // 취소 가능여부 확인
+        ApiResponse<Integer> cancellableResponse = deliveryClient.checkCancellable(orderId);
+        if (cancellableResponse.getResult() != 2) {
+            log.error("반송 불가능: orderId={}", orderId);
+            throw new IllegalStateException("반송 불가능합니다.");
         }
-          // 반송 요청
-          Boolean returnRequested = deliveryClient.requestReturn(orderId);
-          if (!returnRequested) {
-              log.error("반송 요청 실패: orderId={}", orderId);
-              throw new IllegalStateException("반송 요청에 실패했습니다.");
-          }
-          log.info("반송 요청 완료: orderId={}", orderId);
+
+        // 반송 요청
+        deliveryClient.requestReturn(new DeliveryClient.ReturnDeliveryRequest(orderId));
+
         //결제 취소 요청
         Boolean cancelPayment = paymentClient.cancelPayment(
             new PaymentClient.PaymentCancelRequest(orderId, order.getOrderName(), "반품")
