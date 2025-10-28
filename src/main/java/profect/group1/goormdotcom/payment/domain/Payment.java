@@ -45,7 +45,7 @@ public class Payment extends BaseEntity {
         this.payType = payType;
         this.amount = amount;
         this.canceledAmount = (long) 0;
-        this.status = "PENDING"; //DB에서 펜딩상태 긁어오기
+        this.status = "PAY0000"; //DB에서 펜딩상태 긁어오기
     }
 
     public static Payment create(UUID userId,
@@ -62,17 +62,17 @@ public class Payment extends BaseEntity {
     }
 
     public void markSuccess(String paymentKey, LocalDateTime approvedAt) {
-        this.status = "SUCCESS"; //DB에서 성공상태 긁어오기
+        this.status = "PAY0001"; //DB에서 성공상태 긁어오기
         this.paymentKey = paymentKey;
         this.approvedAt = approvedAt;
     }
 
     public void markCancel(LocalDateTime canceledAt) {
-        this.status = "CANCEL"; //DB에서 취소상태 긁어오기
+        this.status = "PAY0004"; //DB에서 취소상태 긁어오기
         this.canceledAt = canceledAt;
     }
 
     public void markFail() {
-        this.status = "FAIL"; //DB에서 실패상태 긁어오기
+        this.status = "PAY0002"; //DB에서 실패상태 긁어오기
     }
 }

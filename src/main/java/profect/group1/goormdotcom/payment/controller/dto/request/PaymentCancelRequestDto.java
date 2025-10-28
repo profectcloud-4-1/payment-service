@@ -10,7 +10,7 @@ import java.util.UUID;
 @Getter
 @Builder
 public class PaymentCancelRequestDto {
-    private String cancelReason;
-    //전액 취소면 필요 X
-    private Long cancelAmount;
+    private UUID orderId;
+    private String orderName;
+    private String reason;
 }

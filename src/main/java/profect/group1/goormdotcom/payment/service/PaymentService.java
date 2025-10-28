@@ -2,7 +2,8 @@ package profect.group1.goormdotcom.payment.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -149,10 +150,13 @@ public class PaymentService {
         paymentEntity.setStatus("PAY0001");
         paymentEntity.setApprovedAt(response.approvedAt().toLocalDateTime());
 
-        //TODO: 히스토리 상태를 성공으로 변경
+        //offsetTime 직렬화를 위한 클래스
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+
         String rawResponseJson = null;
         try {
-            rawResponseJson = new ObjectMapper().writeValueAsString(response);
+            rawResponseJson = objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException ignored) {}
 
         PaymentHistory history = PaymentHistory.create(
@@ -198,26 +202,8 @@ public class PaymentService {
         //상태 검증
         if (paymentEntity.getStatus().equals("PAY0004"))
             throw new PaymentHandler(ErrorStatus._ALREADY_CANCELED_REQUEST);
-        if (!paymentEntity.getStatus().equals("PAY0001")
-                && !paymentEntity.getStatus().equals("PAY0005")) {
+        if (!paymentEntity.getStatus().equals("PAY0001")) {
             throw new PaymentHandler(ErrorStatus._INVALID_PAYMENT_STATUS);
-        }
-
-        //취소 금액 검증
-        long refundableAmount = calculateRefundableAmount(paymentEntity);
-        Long cancelAmount = dto.getCancelAmount() != null ?
-                dto.getCancelAmount() : refundableAmount;
-
-        if (cancelAmount > refundableAmount) {
-            throw new PaymentHandler(ErrorStatus._INVALID_CANCEL_AMOUNT);
-        }
-
-        // 전액 취소면 전체 금액 설정
-        if (dto.getCancelAmount() == null) {
-            dto = PaymentCancelRequestDto.builder()
-                    .cancelReason(dto.getCancelReason())
-                    .cancelAmount(refundableAmount)
-                    .build();
         }
 
         //취소 요청 중 상태로 변경
@@ -229,7 +215,7 @@ public class PaymentService {
                 "PAY0003",                 //결제 취소 대기
                 paymentEntity.getAmount(),
                 paymentEntity.getPaymentKey(),
-                dto.getCancelReason(),
+                dto.getReason(),
                 "CANCEL_REQUESTED"
         );
 
@@ -248,10 +234,7 @@ public class PaymentService {
         String authorizations = "Basic " + Base64.getEncoder().encodeToString((tossPaymentConfig.getSecretKey() + ":").getBytes());
 
         Map<String, Object> body = new HashMap<>();
-        body.put("cancelReason", dto.getCancelReason());
-        if (dto.getCancelAmount() != null) {
-            body.put("cancelAmount", dto.getCancelAmount());
-        }
+        body.put("cancelReason", dto.getReason());
 
         try {
             //TODO: RestClient로 바꾸는 것 고려
@@ -278,7 +261,7 @@ public class PaymentService {
             }
 
             //DB 업데이트 (별도 트랜잭션 메서드 호출)
-            updatePaymentCancelStatus(event.paymentId(), lastCancel.cancelAmount(), lastCancel.canceledAt().toLocalDateTime());
+            updatePaymentCancelStatus(event.paymentId(), lastCancel.canceledAt().toLocalDateTime());
 
         } catch (Exception e) {
             //예외 발생 시 Toss 상태 재조회로 동기화 시도
@@ -287,34 +270,22 @@ public class PaymentService {
     }
 
     @Transactional
-    public void updatePaymentCancelStatus(UUID paymentId, Long canceledAmount, LocalDateTime canceledAt) {
+    public void updatePaymentCancelStatus(UUID paymentId, LocalDateTime canceledAt) {
         PaymentEntity paymentEntity = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
 
-        //현재 취소된 금액 가져오기 (null 안전 처리)
-        long currentCanceledAmount = paymentEntity.getCanceledAmount() != null ?
-                paymentEntity.getCanceledAmount() : 0L;
-
-        //이번에 취소된 금액 추가
-        long currentCanceled = paymentEntity.getCanceledAmount() != null ? paymentEntity.getCanceledAmount() : 0L;
-        long newCanceled = currentCanceled + canceledAmount;
-
-        boolean isPartial = newCanceled < paymentEntity.getAmount();
-        String statusCode = isPartial ? "PAY0005" : "PAY0004";
-
-        paymentEntity.setCanceledAmount(newCanceled);
-        paymentEntity.setStatus(statusCode);
+        paymentEntity.setStatus("PAY0004");
         paymentEntity.setCanceledAt(canceledAt);
 
         paymentRepository.saveAndFlush(paymentEntity);
 
         PaymentHistory history = PaymentHistory.create(
                 paymentEntity.getId(),
-                statusCode,                 //결제 취소 상태(부분/전체)
+                "PAY0004",                 //결제 취소 상태(전체)
                 paymentEntity.getAmount(),
                 paymentEntity.getPaymentKey(),
                 null,
-                isPartial ? "CANCEL_PARTIAL_CONFIRMED" : "CANCEL_FULL_CONFIRMED"
+                "CANCEL_FULL_CONFIRMED"
         );
 
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
@@ -323,6 +294,10 @@ public class PaymentService {
     private void syncPaymentStatusFromToss(String paymentKey) {
         String authorization = "Basic " + Base64.getEncoder()
                 .encodeToString((tossPaymentConfig.getSecretKey() + ":").getBytes());
+
+        //offsetTime 직렬화를 위한 클래스
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
 
         try {
             PaymentSuccessResponseDto tossResponse = tossWebClient.get()
@@ -338,7 +313,7 @@ public class PaymentService {
 
                 TossPaymentStatus tossStatus = TossPaymentStatus.valueOf(tossResponse.status().toUpperCase());
                 String codePk = TossPaymentStatus.getCodeByTossStatus(tossStatus);
-                String rawResponseJson = new ObjectMapper().writeValueAsString(tossResponse);
+                String rawResponseJson = objectMapper.writeValueAsString(tossResponse);
 
                 payment.setStatus(codePk);
                 paymentRepository.save(payment);
@@ -346,7 +321,7 @@ public class PaymentService {
                 PaymentHistory history = PaymentHistory.create(
                         payment.getId(),
                         codePk,                 //결제 취소 상태(부분/전체)
-                        null,
+                        payment.getAmount(),
                         paymentKey,
                         rawResponseJson,
                         "SYNCED_FROM_TOSS"
