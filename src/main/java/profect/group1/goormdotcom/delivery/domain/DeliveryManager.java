@@ -33,9 +33,7 @@ import profect.group1.goormdotcom.delivery.repository.entity.DeliveryReturnEntit
 import profect.group1.goormdotcom.delivery.repository.entity.DeliveryReturnAddressEntity;
 import profect.group1.goormdotcom.delivery.repository.entity.DeliveryReturnStepHistoryEntity;
 import profect.group1.goormdotcom.delivery.repository.entity.GoormAddressEntity;
-import profect.group1.goormdotcom.delivery.repository.entity.CustomerAddressEntity;
 import profect.group1.goormdotcom.delivery.repository.GoormAddressRepository;
-import profect.group1.goormdotcom.delivery.repository.CustomerAddressRepository;
 import profect.group1.goormdotcom.delivery.repository.mapper.DeliveryAddressMapper;
 import profect.group1.goormdotcom.delivery.repository.mapper.DeliveryStepHistoryMapper;
 import profect.group1.goormdotcom.delivery.domain.enums.DeliveryReturnStatus;
@@ -54,7 +52,6 @@ public class DeliveryManager {
 	private final DeliveryReturnRepository returnRepo;
 	private final DeliveryAddressRepository addressRepo;
 	private final GoormAddressRepository goormAddressRepo;
-	private final CustomerAddressRepository customerAddressRepo;
 	private final DeliveryReturnAddressRepository returnAddressRepo;
 	private final DeliveryStepHistoryRepository stepHistoryRepo;
 	private final DeliveryReturnStepHistoryRepository returnStepHistoryRepo;
@@ -65,10 +62,6 @@ public class DeliveryManager {
 
     private final DeliveryOrderClient orderClient;
 
-    public List<DeliveryAddress> getAddressesByCustomerId(UUID customerId) {
-        List<CustomerAddressEntity> entities = this.customerAddressRepo.findAllByCustomerId(customerId);
-        return entities.stream().map(this.deliveryAddressMapper::toDomainFromCustomerAddress).toList();
-    }
 
     public Delivery getDeliveryByOrderId(UUID orderId) {
         DeliveryEntity entity = this.repo.findByOrderId(orderId).orElseThrow(() -> new IllegalArgumentException("Delivery not found"));
@@ -109,7 +102,7 @@ public class DeliveryManager {
         Delivery delivery = DeliveryMapper.toDomain(deliveryEntity);
 
         // insert address
-        DeliveryAddressEntity address = DeliveryAddressEntity.builder()
+        DeliveryAddressEntity deliveryAddressEntity = DeliveryAddressEntity.builder()
             .deliveryId(deliveryId)
             .senderAddress(goormAddressEntity.getAddress())
             .senderAddressDetail(goormAddressEntity.getAddressDetail())
@@ -123,10 +116,10 @@ public class DeliveryManager {
             .receiverName(name)
             .deliveryMemo(deliveryMemo)
             .build();
-        this.addressRepo.save(address);
+        this.addressRepo.save(deliveryAddressEntity);
 
-        delivery.setSenderAddress(this.deliveryAddressMapper.toDomainOfSender(address));
-        delivery.setReceiverAddress(this.deliveryAddressMapper.toDomainOfReceiver(address));
+        delivery.setSenderAddress(this.deliveryAddressMapper.toDomainOfSender(deliveryAddressEntity));
+        delivery.setReceiverAddress(this.deliveryAddressMapper.toDomainOfReceiver(deliveryAddressEntity));
 
         // insert step history
         DeliveryStepHistoryEntity stepHistoryEntity = DeliveryStepHistoryEntity.builder()
@@ -144,7 +137,7 @@ public class DeliveryManager {
             DeliveryStepType.DONE
         ));
 
-        return DeliveryMapper.toDomain(deliveryEntity);
+        return delivery;
     }
 
     @Transactional
@@ -215,39 +208,6 @@ public class DeliveryManager {
         ));
 
         return deliveryReturn;
-    }
-
-    public DeliveryAddress createCustomerAddress(UUID customerId, String address, String addressDetail, String zipcode, String phone, String name) {
-        CustomerAddressEntity entity = CustomerAddressEntity.builder()
-            .customerId(customerId)
-            .address(address)
-            .addressDetail(addressDetail)
-            .zipcode(zipcode)
-            .phone(phone)
-            .name(name)
-            .build();
-        this.customerAddressRepo.save(entity);
-        return this.deliveryAddressMapper.toDomainFromCustomerAddress(entity);
-    }
-
-    public DeliveryAddress updateCustomerAddress(UUID customerId, UUID addressId, String address, String addressDetail, String zipcode, String phone, String name) {
-        CustomerAddressEntity entity = this.customerAddressRepo.findById(addressId)
-            .orElseThrow(() -> new IllegalArgumentException("Customer address not found"));
-        if (!entity.getCustomerId().equals(customerId)) throw new IllegalArgumentException("Forbidden: not your address");
-        entity.setAddress(address);
-        entity.setAddressDetail(addressDetail);
-        entity.setZipcode(zipcode);
-        entity.setPhone(phone);
-        entity.setName(name);
-        this.customerAddressRepo.save(entity);
-        return this.deliveryAddressMapper.toDomainFromCustomerAddress(entity);
-    }
-
-    public void deleteCustomerAddress(UUID customerId, UUID addressId) {
-        CustomerAddressEntity entity = this.customerAddressRepo.findById(addressId)
-            .orElseThrow(() -> new IllegalArgumentException("Customer address not found"));
-        if (!entity.getCustomerId().equals(customerId)) throw new IllegalArgumentException("Forbidden: not your address");
-        this.customerAddressRepo.delete(entity);
     }
 
     // ===== Goormdotcom Address (MASTER) =====

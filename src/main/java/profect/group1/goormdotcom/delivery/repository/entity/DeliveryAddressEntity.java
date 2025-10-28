@@ -86,7 +86,7 @@ public class DeliveryAddressEntity extends BaseEntity {
 	@Comment("수신자 이름")
 	private String receiverName;
 
-	@Column(name = "delivery_memo", nullable = false)
+	@Column(name = "delivery_memo")
 	@Comment("배송 메모")
 	private String deliveryMemo;
 

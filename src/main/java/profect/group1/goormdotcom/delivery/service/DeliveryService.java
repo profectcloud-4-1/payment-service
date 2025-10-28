@@ -41,16 +41,6 @@ public interface DeliveryService {
 	 */
 	public DeliveryReturn returnDelivery(UUID orderId);
 
-	/**
-	 * 고객 배송지 목록 조회
-	 * @param customerId 고객 ID
-	 * @return 배송지 목록
-	 */
-	public List<DeliveryAddress> getAddressesByCustomerId(UUID customerId);
-	public DeliveryAddress createCustomerAddress(UUID customerId, CreateAddressRequestDto body);
-	public DeliveryAddress updateCustomerAddress(UUID customerId, UUID addressId, CreateAddressRequestDto body);
-	public boolean deleteCustomerAddress(UUID customerId, UUID addressId);
-
     // Goorm address (MASTER)
     public DeliveryAddress getGoormAddress();
     public DeliveryAddress createGoormAddress(CreateAddressRequestDto body);

@@ -19,16 +19,9 @@ import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
 import profect.group1.goormdotcom.delivery.service.DeliveryService;
 import profect.group1.goormdotcom.delivery.domain.Delivery;
-import profect.group1.goormdotcom.delivery.domain.DeliveryReturn;
 import profect.group1.goormdotcom.delivery.domain.DeliveryAddress;
-import profect.group1.goormdotcom.delivery.controller.dto.response.CustomerAddressListResponseDto;
-import profect.group1.goormdotcom.delivery.controller.dto.request.CreateAddressRequestDto;
-import jakarta.servlet.http.HttpServletRequest;
-import io.jsonwebtoken.Claims;
-import profect.group1.goormdotcom.delivery.controller.dto.request.CreateDeliveryRequestDto;
-import profect.group1.goormdotcom.delivery.controller.dto.request.StartDeliveryRequestDto;
-import profect.group1.goormdotcom.delivery.controller.dto.request.CancelDeliveryRequestDto;
 import profect.group1.goormdotcom.delivery.controller.dto.response.DeliveryResponseDto;
+import profect.group1.goormdotcom.delivery.controller.dto.request.CreateAddressRequestDto;
 
 @RestController
 @RequestMapping("/api/v1/delivery")
@@ -45,49 +38,7 @@ public class DeliveryController implements DeliveryApiDocs {
 	}
 
 
-	@GetMapping("/address/mine")
-	public ApiResponse<CustomerAddressListResponseDto> getMyAddresses(
-		HttpServletRequest request
-		) {
-		Claims claims = (Claims) request.getAttribute("jwtClaims");
-		UUID customerId = UUID.fromString(claims.getSubject());
-		List<DeliveryAddress> addresses = this.service.getAddressesByCustomerId(customerId);
-		return ApiResponse.onSuccess(CustomerAddressListResponseDto.of(addresses));
-	}
-
-	@PostMapping("/address/mine")
-	public ApiResponse<DeliveryAddress> createMyAddress(
-		@RequestBody @Valid CreateAddressRequestDto body,
-		HttpServletRequest request
-	) {
-		Claims claims = (Claims) request.getAttribute("jwtClaims");
-		UUID customerId = UUID.fromString(claims.getSubject());
-		DeliveryAddress address = this.service.createCustomerAddress(customerId, body);
-		return ApiResponse.onSuccess(address);
-	}
-
-    @PutMapping("/address/mine/{addressId}")
-	public ApiResponse<DeliveryAddress> updateMyAddress(
-		@RequestBody @Valid CreateAddressRequestDto body,
-        HttpServletRequest request,
-        @PathVariable UUID addressId
-	) {
-		Claims claims = (Claims) request.getAttribute("jwtClaims");
-		UUID customerId = UUID.fromString(claims.getSubject());
-        DeliveryAddress address = this.service.updateCustomerAddress(customerId, addressId, body);
-		return ApiResponse.onSuccess(address);
-	}
-
-    @DeleteMapping("/address/mine/{addressId}")
-	public ApiResponse<Boolean> deleteMyAddress(
-        HttpServletRequest request,
-        @PathVariable UUID addressId
-	) {
-		Claims claims = (Claims) request.getAttribute("jwtClaims");
-		UUID customerId = UUID.fromString(claims.getSubject());
-        boolean ok = this.service.deleteCustomerAddress(customerId, addressId);
-		return ApiResponse.onSuccess(ok);
-	}
+	
 
 	// ===== Goorm Address (MASTER 전용) =====
     @GetMapping("/address/goorm")

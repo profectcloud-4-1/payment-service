@@ -3,7 +3,6 @@ package profect.group1.goormdotcom.delivery.repository.mapper;
 import profect.group1.goormdotcom.delivery.domain.DeliveryAddress;
 import org.springframework.stereotype.Component;
 import profect.group1.goormdotcom.delivery.repository.entity.DeliveryAddressEntity;
-import profect.group1.goormdotcom.delivery.repository.entity.CustomerAddressEntity;
 import profect.group1.goormdotcom.delivery.repository.entity.GoormAddressEntity;
 
 
@@ -30,18 +29,6 @@ public class DeliveryAddressMapper {
             .phone(entity.getReceiverPhone())
             .name(entity.getReceiverName())
             .deliveryMemo(entity.getDeliveryMemo())
-            .build();
-    }
-
-    public DeliveryAddress toDomainFromCustomerAddress(final CustomerAddressEntity entity) {
-        return DeliveryAddress.builder()
-            .id(entity.getId())
-            .address(entity.getAddress())
-            .addressDetail(entity.getAddressDetail())
-            .zipcode(entity.getZipcode())
-            .phone(entity.getPhone())
-            .name(entity.getName())
-            .deliveryMemo(null)
             .build();
     }
 

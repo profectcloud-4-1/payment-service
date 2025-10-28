@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.delivery.service.DeliveryService;
 import profect.group1.goormdotcom.delivery.domain.Delivery;
-import profect.group1.goormdotcom.delivery.controller.dto.request.CreateDeliveryRequestDto;
 import profect.group1.goormdotcom.delivery.controller.dto.request.StartDeliveryRequestDto;
 import profect.group1.goormdotcom.delivery.controller.dto.request.CancelDeliveryRequestDto;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;

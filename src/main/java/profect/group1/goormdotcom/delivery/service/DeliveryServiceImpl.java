@@ -63,23 +63,6 @@ public class DeliveryServiceImpl implements DeliveryService {
 		return deliveryReturn;
 	}
 
-	public List<DeliveryAddress> getAddressesByCustomerId(UUID customerId) {
-		return this.deliveryManager.getAddressesByCustomerId(customerId);
-	}
-
-	public DeliveryAddress createCustomerAddress(UUID customerId, CreateAddressRequestDto body) {
-		return this.deliveryManager.createCustomerAddress(customerId, body.getAddress(), body.getAddressDetail(), body.getZipcode(), body.getPhone(), body.getName());
-	}
-
-    public DeliveryAddress updateCustomerAddress(UUID customerId, UUID addressId, CreateAddressRequestDto body) {
-        return this.deliveryManager.updateCustomerAddress(customerId, addressId, body.getAddress(), body.getAddressDetail(), body.getZipcode(), body.getPhone(), body.getName());
-	}
-
-    public boolean deleteCustomerAddress(UUID customerId, UUID addressId) {
-        this.deliveryManager.deleteCustomerAddress(customerId, addressId);
-        return true;
-	}
-
     // Brand address (MASTER)
     public DeliveryAddress getGoormAddress() {
         return this.deliveryManager.getGoormAddress();
