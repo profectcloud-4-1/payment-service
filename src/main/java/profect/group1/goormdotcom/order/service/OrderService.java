@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.order.client.DeliveryClient;
 import profect.group1.goormdotcom.order.client.PaymentClient; //?
+import profect.group1.goormdotcom.order.client.StockAdjustmentResponseDto;
 import profect.group1.goormdotcom.order.client.StockClient; //?
 import profect.group1.goormdotcom.order.controller.dto.OrderItemDto;
 import profect.group1.goormdotcom.order.controller.dto.OrderRequestDto;
@@ -68,23 +70,24 @@ public class OrderService {
     // 1) 주문 생성: 재고 선차감(예약) + 주문(PENDING) -> 주문 완료 하면 
     // 재고 확인 먼저
     @Transactional
-    public Order create(OrderRequestDto req) {
+    public Order create(OrderRequestDto req, UUID customerAddressId) {
         log.info("주문 생성 시작: customerId={}, itemCount={}", req.getCustomerId(), req.getItems().size());
 
-        //재고 확인
-        // for (OrderItemDto item : req.getItems()) {
-        //     Boolean stockAvailable = stockClient.checkStock(item.getProductId(), item.getQuantity());
-        //     if (!stockAvailable) {
-        //         log.warn("재고 부족: productId={}", item.getProductId());
-        //         throw new IllegalStateException("재고가 부족합니다.");
-        //     }
-        // }
-        // log.info("재고 확인 완료");
+        // 재고 차감 (주문 생성 전 선차감)
+        for (OrderItemDto itemDto : req.getItems()) {
+            StockAdjustmentResponseDto stockResponse = stockClient.decreaseStock(itemDto.getProductId(), itemDto.getQuantity());
+            if (!stockResponse.status()) {
+                log.error("재고 차감 실패: productId={}, quantity={}", itemDto.getProductId(), itemDto.getQuantity());
+                throw new IllegalStateException("재고 차감에 실패했습니다. productId=" + itemDto.getProductId());
+            }
+        }
+        log.info("재고 차감 완료");
 
         // 아이템 저장 (초기 값을 지정 해주고, 그 초기 값을 바탕으로 받아서 상태값만 변경해서 사용하는 방식으로 진행 )
         // 기존에 내가 하던 방식은 OrderId 를 OrderName과 연동해야 해서 새로운 객체를 받고 그거를 바탕으로 루프 돌아야 하는게 그런방식이 영속성 문제에 걸려서 하지 못한 거였음
         OrderEntity orderEntity = OrderEntity.builder()
                         .customerId(req.getCustomerId())
+                        .customerAddressId(customerAddressId)
                         // .sellerId(req.getSellerId())
                         .totalAmount(req.getTotalAmount())
                         .orderName(req.getOrderName())
@@ -112,88 +115,54 @@ public class OrderService {
         // 상태 이력 추가
         appendOrderStatus(orderEntity.getId(), OrderStatus.PENDING);
 
-        log.info("주문 생성 완료: orderId={}, status=결제대기", orderEntity.getId());
+        log.info("주문 생성 완료: orderId={}, orderName={}, status=결제대기", 
+            orderEntity.getId(), orderEntity.getOrderName());
+
+        // 배송 생성
+        ApiResponse<UUID> deliveryResponse = deliveryClient.createDelivery(
+            new DeliveryClient.CreateDeliveryRequest(orderEntity.getId(), customerAddressId)
+        );
+
+        if (!deliveryResponse.getCode().equals("COMMON200")) {
+            log.error("배송 생성 실패: orderId={}, code={}, message={}", 
+                orderEntity.getId(), deliveryResponse.getCode(), deliveryResponse.getMessage());
+            appendOrderStatus(orderEntity.getId(), OrderStatus.CANCELLED);
+            throw new IllegalStateException("배송 생성에 실패했습니다: " + deliveryResponse.getMessage());
+        }
+        log.info("배송 생성 완료: orderId={}, orderName={}, deliveryId={}", 
+            orderEntity.getId(), orderEntity.getOrderName(), deliveryResponse.getResult());
+
         return orderMapper.toDomain(orderEntity);
     }
-
     public Order completePayment(UUID orderId) {
         log.info("결제 완료 처리 시작: orderId={}", orderId);
 
         OrderEntity order = findOrderOrThrow(orderId);
-        // 실제 결제 완료 처리 요청청
-        log.info("결제 완료: orderId={}", orderId );
-
-        //결제 완료 테스트트
-        // Boolean paymentVerified = true;
-        // if (paymentCheckEnabled) {
-        //     paymentVerified = paymentClient.verifyPayment(
-        //         new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
-        //     );
-        //     if (!paymentVerified) {
-        //         appendOrderStatus(orderId, OrderStatus.CANCELLED);
-        //         throw new IllegalStateException("결제 실패");
-        //     }
-        // } else {
-        //     log.info("[DEV] 결제 확인 생략됨");
-        // }
-
-        //재고 감소
-        // List<OrderProductEntity> products = orderProductRepository.findAll().stream()
-        //     .filter(p -> p.getOrder().getId().equals(orderId))
-        //     .toList();
         
-        // for (OrderProductEntity product : products) {
-        //     Boolean stockDecreased = stockClient.decreaseStock(product.getProductId(), product.getQuantity());
-        //     if (!stockDecreased) {
-        //         log.error("재고 차감 실패: orderId={}, productId={}", orderId, product.getProductId());
-        //         appendOrderStatus(orderId, OrderStatus.CANCELLED);
-        //         throw new IllegalStateException("재고 차감에 실패했습니다.");
-        //     }
-        // }
-        // log.info("재고 차감 완료: orderId={}", orderId);
+        // 결제 검증
+        Boolean paymentVerified = paymentClient.verifyPayment(
+            new PaymentClient.PaymentVerifyRequest(orderId, order.getOrderName(), order.getTotalAmount())
+        );
+        
+        if (!paymentVerified) {
+            log.error("결제 검증 실패: orderId={}", orderId);
+            appendOrderStatus(orderId, OrderStatus.CANCELLED);
+            throw new IllegalStateException("결제 검증에 실패했습니다.");
+        }
+        log.info("결제 검증 완료: orderId={}", orderId);
 
-        // log.info("재고 차감 완료: orderId={}", orderId);
-
-        //배송 요청
-        // Boolean deliveryRequested = deliveryClient.requestDelivery(
-        //     new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
-        // );
-
-        // if (!deliveryRequested) {
-        //     log.error("배송 요청 실패: orderId={}", orderId);
-        //     appendOrderStatus(orderId, OrderStatus.CANCELLED);
-        //     throw new IllegalStateException("배송 요청에 실패했습니다.");
-        // }
-        // log.info("배송 요청 완료: orderId={}", orderId);
-
-//--------------------------------
-
-        // //배송 요청 테스트
-        // Boolean deliveryRequested = true;
-        // if (deliveryCheckEnabled) {
-        //     deliveryRequested = deliveryClient.requestDelivery(
-        //         new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
-        //     );
-        //     if (!deliveryRequested) {
-        //         log.error("배송 요청 실패: orderId={}", orderId);
-        //         appendOrderStatus(orderId, OrderStatus.CANCELLED);
-        //         throw new IllegalStateException("배송 요청에 실패했습니다.");
-        //     }
-        //     log.info("배송 요청 완료: orderId={}", orderId);
-        // } else {
-        //     log.info("[DEV] 배송 요청 생략됨");
-        // }
-        // 배송 요청
-        Boolean deliveryRequested = deliveryClient.requestDelivery(
-            new DeliveryClient.DeliveryRequest(orderId, order.getCustomerId())
+        // 배송 시작 
+        ApiResponse<UUID> startResponse = deliveryClient.startDelivery(
+            new DeliveryClient.StartDeliveryRequest(orderId)
         );
 
-        if (!deliveryRequested) {
-            log.error("배송 요청 실패: orderId={}", orderId);
+        if (!startResponse.getCode().equals("COMMON200")) {
+            log.error("배송 시작 실패: orderId={}, code={}, message={}", 
+                orderId, startResponse.getCode(), startResponse.getMessage());
             appendOrderStatus(orderId, OrderStatus.CANCELLED);
-            throw new IllegalStateException("배송 요청에 실패했습니다.");
+            throw new IllegalStateException("배송 시작에 실패했습니다: " + startResponse.getMessage());
         }
-        log.info("배송 요청 완료: orderId={}", orderId);
+        log.info("배송 시작 완료: orderId={}, deliveryId={}", orderId, startResponse.getResult());
 
         // 주문 상태 업데이트       
         appendOrderStatus(orderId, OrderStatus.COMPLETED);
@@ -201,7 +170,7 @@ public class OrderService {
     }
     // 결제 취소 (배송전)
     public Order delieveryBefore(UUID orderId) {
-        log.info("반품 처리 시작: orderId={}", orderId);
+        log.info("취소 처리 시작: orderId={}", orderId);
         
         OrderEntity order = findOrderOrThrow(orderId);
         DeliveryClient.DeliveryStatusResponse deliveryStatus = deliveryClient.getDeliveryStatus(orderId);
@@ -226,13 +195,14 @@ public class OrderService {
         //     .toList();
         
         // for (OrderProductEntity product : products) {
-        //     Boolean stockIncreased = stockClient.increaseStock(product.getProductId(), product.getQuantity());
-        //     if (!stockIncreased) {
+        //     StockAdjustmentResponseDto stockResponse = stockClient.increaseStock(product.getProductId(), product.getQuantity());
+        //     if (!stockResponse.status()) {
         //         log.error("재고 복구 실패: orderId={}, productId={}", orderId, product.getProductId());
-        //         throw new IllegalStateException("재고 복구에 실패했습니다.");
+        //         throw new IllegalStateException("재고 복구에 실패했습니다. productId=" + product.getProductId());
         //     }
         // }
         // log.info("재고 복구 완료: orderId={}", orderId);
+
         //배송 취소 요청
         Boolean cancelDelivery = deliveryClient.cancelDelivery(orderId);
         if(!cancelDelivery) {

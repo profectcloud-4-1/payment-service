@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
-
+import profect.group1.goormdotcom.apiPayload.ApiResponse;
 /**
  * 배송 서비스와 통신하는 Feign Client
  * - 배송 요청
@@ -18,13 +18,13 @@ import java.util.UUID;
 @FeignClient(name = "delivery-service")
 public interface DeliveryClient {
 
-    /**
-     * 배송 요청 (결제 완료 후)
-     * @param request 배송 요청 정보
-     * @return 배송 요청 성공 여부
-     */
-    @PostMapping("/api/v1/delivery")
-    Boolean requestDelivery(@RequestBody DeliveryRequest request);
+    // /**
+    //  * 배송 요청 (결제 완료 후)
+    //  * @param request 배송 요청 정보
+    //  * @return 배송 요청 성공 여부
+    //  */
+    // @PostMapping("/internal/v1/delivery")
+    // Boolean requestDelivery(@RequestBody);
 
     // /**
     //  * 간단한 배송 요청 (orderId, customerId만)
@@ -32,7 +32,7 @@ public interface DeliveryClient {
     //  * @param customerId 고객 ID
     //  * @return 배송 요청 성공 여부
     //  */
-    // @PostMapping("/api/v1/delivery/request-simple")
+    // @PostMapping("/internal/v1/delivery/request-simple")
     // Boolean requestDeliverySimple(@RequestParam UUID orderId, @RequestParam UUID customerId);
 
     /**
@@ -40,15 +40,20 @@ public interface DeliveryClient {
      * @param orderId 주문 ID
      * @return 배송 상태
      */
-    @GetMapping("/api/v1/delivery/status/{orderId}")
+    @GetMapping("/internal/v1/delivery/status/{orderId}")
     DeliveryStatusResponse getDeliveryStatus(@PathVariable("orderId") UUID orderId);
 
-    /**
+    @PostMapping("/internal/v1/delivery")
+    ApiResponse<UUID> createDelivery( @RequestBody CreateDeliveryRequest request);
+
+    @PostMapping("/internal/v1/delivery/start")
+    ApiResponse<UUID> startDelivery(@RequestBody StartDeliveryRequest request);
+        /**
      * 배송 취소 요청 (배송 시작 전)
      * @param orderId 주문 ID
      * @return 취소 성공 여부
      */
-    @PostMapping("/api/v1/delivery/cancel/{orderId}")
+    @PostMapping("/internal/v1/delivery/cancel/{orderId}")
     Boolean cancelDelivery(@PathVariable("orderId") UUID orderId);
 
     /**
@@ -56,18 +61,20 @@ public interface DeliveryClient {
      * @param orderId 주문 ID
      * @return 반송 요청 성공 여부
      */
-    @PostMapping("/api/v1/delivery/return/{orderId}")
+    @PostMapping("/internal/v1/delivery/return/{orderId}")
     Boolean requestReturn(@PathVariable("orderId") UUID orderId);
 
+
+
+    record CreateDeliveryRequest(
+        UUID orderId,
+        UUID customerAddressId
+    ) {}
     /**
      * 배송 요청 DTO
      */
-    record DeliveryRequest(
-        UUID orderId,
-        UUID customerAddressId
-        // String address,
-        // String recipientName,
-        // String recipientPhone
+    record StartDeliveryRequest(
+        UUID orderId
     ) {}
 
     /**

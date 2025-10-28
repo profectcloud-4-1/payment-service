@@ -31,19 +31,19 @@ public interface StockClient {
      * 재고 차감 (주문 확정 시)
      * @param productId 상품 ID
      * @param quantity 차감할 수량
-     * @return 차감 성공 여부
+     * @return 차감 결과
      */
     @PostMapping("/api/v1/stock/decrease/{productId}")
-    Boolean decreaseStock(@PathVariable("productId") UUID productId,
+    StockAdjustmentResponseDto decreaseStock(@PathVariable("productId") UUID productId,
                           @RequestParam("quantity") int quantity);
 
     /**
      * 재고 복구 (주문 취소 시)
      * @param productId 상품 ID
      * @param quantity 복구할 수량
-     * @return 복구 성공 여부
+     * @return 복구 결과
      */
     @PostMapping("/api/v1/stock/increase/{productId}")
-    Boolean increaseStock(@PathVariable("productId") UUID productId,
+    StockAdjustmentResponseDto increaseStock(@PathVariable("productId") UUID productId,
                           @RequestParam("quantity") int quantity);
 }

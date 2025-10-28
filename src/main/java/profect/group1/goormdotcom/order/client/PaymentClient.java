@@ -27,7 +27,7 @@ public interface PaymentClient {
      * @param request 결제 취소 요청
      * @return 취소 성공 여부
      */
-    @PostMapping("/api/v1/payment/cancel")
+    @PostMapping("/api/v1/payments/toss/cancel")
     Boolean cancelPayment(@RequestBody PaymentCancelRequest request);
 
     /**

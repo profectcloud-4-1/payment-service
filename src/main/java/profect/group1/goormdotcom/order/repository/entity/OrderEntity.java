@@ -29,6 +29,7 @@ public class OrderEntity extends BaseEntity {
     private UUID id;
     
     private UUID customerId;
+    private UUID customerAddressId;
     private UUID sellerId;
 
     // 재고와 연결
