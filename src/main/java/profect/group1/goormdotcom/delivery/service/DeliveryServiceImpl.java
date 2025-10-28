@@ -47,37 +47,20 @@ public class DeliveryServiceImpl implements DeliveryService {
 		return DeliveryMapper.toDomain(found.get()).canReturn();
 	}
 
-	public Delivery createDelivery(UUID orderId, UUID customerAddressId) {
-		Delivery delivery = this.deliveryManager.createDelivery(orderId, customerAddressId);
+	public Delivery startDelivery(UUID orderId, UUID customerId, String address, String addressDetail, String zipcode, String phone, String name, String deliveryMemo) {
+		Delivery delivery = this.deliveryManager.startDelivery(orderId, customerId, address, addressDetail, zipcode, phone, name, deliveryMemo);
 
 		return delivery;
 	}
 
-	public boolean cancel(UUID deliveryId) {
-		this.deliveryManager.cancel(deliveryId);
+	public boolean cancel(UUID orderId) {
+		this.deliveryManager.cancel(orderId);
 		return true;
 	}
 
-	public DeliveryReturn returnDelivery(UUID deliveryId) {
-		DeliveryReturn deliveryReturn = this.deliveryManager.returnDelivery(deliveryId);
+	public DeliveryReturn returnDelivery(UUID orderId) {
+		DeliveryReturn deliveryReturn = this.deliveryManager.returnDelivery(orderId);
 		return deliveryReturn;
-	}
-
-	public List<DeliveryAddress> getAddressesByCustomerId(UUID customerId) {
-		return this.deliveryManager.getAddressesByCustomerId(customerId);
-	}
-
-	public DeliveryAddress createCustomerAddress(UUID customerId, CreateAddressRequestDto body) {
-		return this.deliveryManager.createCustomerAddress(customerId, body.getAddress(), body.getAddressDetail(), body.getZipcode(), body.getPhone(), body.getName());
-	}
-
-    public DeliveryAddress updateCustomerAddress(UUID customerId, UUID addressId, CreateAddressRequestDto body) {
-        return this.deliveryManager.updateCustomerAddress(customerId, addressId, body.getAddress(), body.getAddressDetail(), body.getZipcode(), body.getPhone(), body.getName());
-	}
-
-    public boolean deleteCustomerAddress(UUID customerId, UUID addressId) {
-        this.deliveryManager.deleteCustomerAddress(customerId, addressId);
-        return true;
 	}
 
     // Brand address (MASTER)

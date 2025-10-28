@@ -15,6 +15,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CancelDeliveryRequestDto {
     @Schema(description = "주문 ID (p_order.id)")
-    @NotBlank
     private UUID orderId;
 }

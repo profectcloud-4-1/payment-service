@@ -40,6 +40,10 @@ public class DeliveryEntity extends BaseEntity {
 	@UuidGenerator
 	private UUID id;
 
+	@Column(name = "customer_id", nullable = false)
+	@Comment("구매자 ID (p_user.id)")
+	private UUID customerId;
+
 	@Column(name = "deleted_at")
 	private LocalDateTime deletedAt;
 	

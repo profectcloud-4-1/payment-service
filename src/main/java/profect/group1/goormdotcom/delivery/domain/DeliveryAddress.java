@@ -21,4 +21,5 @@ public class DeliveryAddress {
 	private final String zipcode;
 	private final String phone;
 	private final String name;
+	private final String deliveryMemo;
 }
