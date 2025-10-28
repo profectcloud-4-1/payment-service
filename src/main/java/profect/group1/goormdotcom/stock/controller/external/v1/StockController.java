@@ -1,15 +1,12 @@
-package profect.group1.goormdotcom.stock.controller.v1;
+package profect.group1.goormdotcom.stock.controller.external.v1;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import profect.group1.goormdotcom.stock.controller.dto.ProductStockAdjustmentRequestDto;
-import profect.group1.goormdotcom.stock.controller.dto.StockAdjustmentRequestDto;
-import profect.group1.goormdotcom.stock.controller.dto.StockAdjustmentResponseDto;
-import profect.group1.goormdotcom.stock.controller.dto.StockRequestDto;
-import profect.group1.goormdotcom.stock.controller.dto.StockResponseDto;
+import profect.group1.goormdotcom.stock.controller.external.v1.dto.StockRequestDto;
+import profect.group1.goormdotcom.stock.controller.external.v1.dto.StockResponseDto;
 import profect.group1.goormdotcom.stock.controller.mapper.StockDtoMapper;
 import profect.group1.goormdotcom.stock.domain.Stock;
 import profect.group1.goormdotcom.stock.service.StockService;
@@ -74,33 +71,6 @@ public class StockController implements StockApiDocs {
     ) {
         stockService.deleteStock(productId);
         return ApiResponse.of(SuccessStatus._OK, productId);
-    }
-    
-    @PostMapping("/decrease")
-    public ApiResponse<StockAdjustmentResponseDto> decreaseStocks(
-        @RequestBody @Valid StockAdjustmentRequestDto stockAdjustmentRequestDto
-    ) {
-        Map<UUID, Integer> requestedQuantityMap = new HashMap<UUID, Integer>();
-        for (ProductStockAdjustmentRequestDto dto : stockAdjustmentRequestDto.products()) {
-            requestedQuantityMap.put(dto.productId(), dto.requestedStockQuantity());
-        }
-
-        // TODO: 재시도 로직 필요
-        Boolean status = stockService.decreaseStocks(requestedQuantityMap);
-        return ApiResponse.of(SuccessStatus._OK, new StockAdjustmentResponseDto(status, new ArrayList<UUID>(requestedQuantityMap.keySet())));
-    }
-
-    @PostMapping("/increase")
-    public ApiResponse<StockAdjustmentResponseDto> increaseStocks(
-        @RequestBody @Valid StockAdjustmentRequestDto stockAdjustmentRequestDto
-    ) {
-        Map<UUID, Integer> requestedQuantityMap = new HashMap<UUID, Integer>();
-        for (ProductStockAdjustmentRequestDto dto : stockAdjustmentRequestDto.products()) {
-            requestedQuantityMap.put(dto.productId(), dto.requestedStockQuantity());
-        }
-
-        Boolean status = stockService.increaseStocks(requestedQuantityMap);
-        return ApiResponse.of(SuccessStatus._OK, new StockAdjustmentResponseDto(status, new ArrayList<UUID>(requestedQuantityMap.keySet())));
     }
     
 }

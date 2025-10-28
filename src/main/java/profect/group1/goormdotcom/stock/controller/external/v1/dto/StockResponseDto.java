@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.stock.controller.dto;
+package profect.group1.goormdotcom.stock.controller.external.v1.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

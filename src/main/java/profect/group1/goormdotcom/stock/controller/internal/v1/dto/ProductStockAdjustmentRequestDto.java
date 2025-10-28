@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.stock.controller.dto;
+package profect.group1.goormdotcom.stock.controller.internal.v1.dto;
 
 import java.util.UUID;
 
