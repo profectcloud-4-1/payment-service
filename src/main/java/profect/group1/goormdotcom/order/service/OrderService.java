@@ -24,6 +24,7 @@ import profect.group1.goormdotcom.order.repository.OrderProductRepository;
 import profect.group1.goormdotcom.order.repository.OrderRepository;
 import profect.group1.goormdotcom.order.repository.OrderStatusRepository;
 import profect.group1.goormdotcom.order.repository.entity.OrderEntity;
+import profect.group1.goormdotcom.order.repository.entity.OrderAddressEntity;
 import profect.group1.goormdotcom.order.repository.entity.OrderProductEntity;
 import profect.group1.goormdotcom.order.repository.entity.OrderStatusEntity;
 
@@ -76,20 +77,20 @@ public class OrderService {
         // log.info("주문 생성 시작: customerId={}, itemCount={}", req.getCustomerId(), req.getItems().size());
 
         // 재고 차감 (주문 생성 전 선차감)
-        for (OrderItemDto itemDto : req.getItems()) {
-            StockAdjustmentResponseDto stockResponse = stockClient.decreaseStock(itemDto.getProductId(), itemDto.getQuantity());
-            if (!stockResponse.status()) {
-                log.error("재고 차감 실패: productId={}, quantity={}", itemDto.getProductId(), itemDto.getQuantity());
-                throw new IllegalStateException("재고 차감에 실패했습니다. productId=" + itemDto.getProductId());
-            }
-        }
-        log.info("재고 차감 완료");
+        // for (OrderItemDto itemDto : req.getItems()) {
+        //     StockAdjustmentResponseDto stockResponse = stockClient.decreaseStock(itemDto.getProductId(), itemDto.getQuantity());
+        //     if (!stockResponse.status()) {
+        //         log.error("재고 차감 실패: productId={}, quantity={}", itemDto.getProductId(), itemDto.getQuantity());
+        //         throw new IllegalStateException("재고 차감에 실패했습니다. productId=" + itemDto.getProductId());
+        //     }
+        // }
+        // log.info("재고 차감 완료");
 
         // 아이템 저장 (초기 값을 지정 해주고, 그 초기 값을 바탕으로 받아서 상태값만 변경해서 사용하는 방식으로 진행 )
         // 기존에 내가 하던 방식은 OrderId 를 OrderName과 연동해야 해서 새로운 객체를 받고 그거를 바탕으로 루프 돌아야 하는게 그런방식이 영속성 문제에 걸려서 하지 못한 거였음
         OrderEntity orderEntity = OrderEntity.builder()
                         .customerId(req.getCustomerId())
-                        .customerAddressId(customerAddressId)
+                        // .customerAddressId(customerAddressId)
                         // .sellerId(req.getSellerId())
                         .totalAmount(req.getTotalAmount())
                         .orderName(req.getOrderName())
@@ -133,7 +134,9 @@ public class OrderService {
         log.info("주문 생성 완료: orderId={}, orderName={}, status=결제대기", 
             orderEntity.getId(), orderEntity.getOrderName());
 
+        return orderMapper.toDomain(orderEntity);
     }
+
     public Order completePayment(UUID orderId) {
         log.info("결제 완료 처리 시작: orderId={}", orderId);
 
@@ -175,7 +178,7 @@ public class OrderService {
         
         //결제 취소 요청
         Boolean cancelPayment = paymentClient.cancelPayment(
-            new PaymentClient.PaymentCancelRequest(orderId, order.getOrderName(), "반품")
+            new PaymentClient.PaymentCancelRequest(orderId, orderEntity.getOrderName(), "반품")
         );
         if (!cancelPayment) {
             log.error("결제 취소 실패: orderId={}", orderId);

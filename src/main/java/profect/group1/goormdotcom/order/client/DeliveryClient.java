@@ -76,7 +76,7 @@ public interface DeliveryClient {
         UUID customerId,
         String address,
         String addressDetail,
-        Stirng zipcode,
+        String zipcode,
         String phone,
         String name,
         String deliveryMemo

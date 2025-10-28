@@ -11,13 +11,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.SQLDelete;
 
-@Entity
-@Table(name = "p_order_address")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "p_order_address")
 @Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
 @SQLDelete(sql = "update p_order_address set deleted_at = NOW() where id = ?")
 public class OrderAddressEntity extends BaseEntity {
@@ -29,6 +31,8 @@ public class OrderAddressEntity extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "customer_id", nullable = false)
+    private UUID customerId;
     // 주문ID
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
