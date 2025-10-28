@@ -16,7 +16,7 @@ public class OrderRequestDto {
     private UUID customerId;
 
     @NotNull
-    private UUID sellerId;
+    private UUID customerAddressId;
 
     private String orderName;
 

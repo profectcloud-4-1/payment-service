@@ -18,34 +18,42 @@ import profect.group1.goormdotcom.order.domain.Order;
 public class OrderController {
 
     private final OrderService orderService;
-    //주문생성 (재고 확인까지)
+    
+    //주문생성 
     // *POST /api/v1/orders
-    @PostMapping("api/v1/orders")
+    @PostMapping
     public ResponseEntity<Order> create(@Valid @RequestBody OrderRequestDto req) {
         Order order = orderService.create(req);
         return ResponseEntity.ok(order);
     }
 
-    @PostMapping("/{orderId}/cancel")
-    public ResponseEntity<Order> cancel(@PathVariable UUID orderId, @RequestParam UUID paymentId) {
-        return ResponseEntity.ok(orderService.cancel(orderId, paymentId));
+    //결제 완료
+    @PostMapping("/{orderId}/payment")
+    public ResponseEntity<Order> completePayment(@PathVariable UUID orderId){
+        return ResponseEntity.ok(orderService.completePayment(orderId));
     }
-    /**
-     * 반송 완료 처리 (배송 서비스에서 webhook 호출)
-     * POST /api/v1/orders/{orderId}/return/complete
-     */
-    // @PostMapping("/{orderId}/return/complete")
-    // public ResponseEntity<OrderResponseDto> completeReturn(@PathVariable UUID orderId) {
-    //     return ResponseEntity.ok(orderService.completeReturn(orderId));
-    // }
+    
+    //배송 전 취소 (반품)
+    @PostMapping("/{orderId}/delivery-before")
+    public ResponseEntity<Order> deliveryBefore(@PathVariable UUID orderId) {
+        return ResponseEntity.ok(orderService.delieveryBefore(orderId));
+    }
+
+    //배송 후 취소 (반송)
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<Order> cancel(@PathVariable UUID orderId) {
+        return ResponseEntity.ok(orderService.cancel(orderId));
+    }
+ 
+    //전체 조회
     @GetMapping
     public ResponseEntity<List<Order>> getAllOrders(){
         return ResponseEntity.ok(orderService.getAll());
     }
 
+    //단건 조회
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOne(@PathVariable UUID id){
         return ResponseEntity.ok(orderService.getOne(id));
     }
-
 }

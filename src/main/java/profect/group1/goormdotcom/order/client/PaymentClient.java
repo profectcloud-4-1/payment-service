@@ -35,7 +35,7 @@ public interface PaymentClient {
      */
     record PaymentVerifyRequest(
         UUID orderId,
-        UUID paymentId,
+        // UUID paymentId,
         String orderName,
         int amount
     ) {}
@@ -45,7 +45,7 @@ public interface PaymentClient {
      */
     record PaymentCancelRequest(
         UUID orderId,
-        UUID paymentId,
+        // UUID paymentId,
         String orderName,
         String reason
     ) {}

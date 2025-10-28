@@ -23,7 +23,7 @@ public interface DeliveryClient {
      * @param request 배송 요청 정보
      * @return 배송 요청 성공 여부
      */
-    @PostMapping("/api/v1/delivery/request")
+    @PostMapping("/api/v1/delivery")
     Boolean requestDelivery(@RequestBody DeliveryRequest request);
 
     // /**
@@ -64,7 +64,7 @@ public interface DeliveryClient {
      */
     record DeliveryRequest(
         UUID orderId,
-        UUID customerId
+        UUID customerAddressId
         // String address,
         // String recipientName,
         // String recipientPhone

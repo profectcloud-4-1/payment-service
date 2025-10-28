@@ -4,27 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import profect.group1.goormdotcom.order.client.DeliveryClient; //?
+import profect.group1.goormdotcom.order.client.DeliveryClient;
 import profect.group1.goormdotcom.order.client.PaymentClient; //?
-import profect.group1.goormdotcom.order.client.StockClient;
+import profect.group1.goormdotcom.order.client.StockClient; //?
 import profect.group1.goormdotcom.order.controller.dto.OrderItemDto;
 import profect.group1.goormdotcom.order.controller.dto.OrderRequestDto;
 import profect.group1.goormdotcom.order.domain.Order;
-import profect.group1.goormdotcom.order.domain.enums.OrderStatus; //?
-import profect.group1.goormdotcom.order.domain.mapper.OrderMapper;
+import profect.group1.goormdotcom.order.domain.enums.OrderStatus;
+import profect.group1.goormdotcom.order.domain.mapper.OrderMapper; //?
 import profect.group1.goormdotcom.order.repository.OrderProductRepository;
 import profect.group1.goormdotcom.order.repository.OrderRepository;
 import profect.group1.goormdotcom.order.repository.OrderStatusRepository;
 import profect.group1.goormdotcom.order.repository.entity.OrderEntity;
 import profect.group1.goormdotcom.order.repository.entity.OrderProductEntity;
 import profect.group1.goormdotcom.order.repository.entity.OrderStatusEntity;
-import profect.group1.goormdotcom.order.service.OrderNameFormatter;
 
 @Slf4j
 @Service
@@ -87,9 +85,9 @@ public class OrderService {
         // 기존에 내가 하던 방식은 OrderId 를 OrderName과 연동해야 해서 새로운 객체를 받고 그거를 바탕으로 루프 돌아야 하는게 그런방식이 영속성 문제에 걸려서 하지 못한 거였음
         OrderEntity orderEntity = OrderEntity.builder()
                         .customerId(req.getCustomerId())
-                        .sellerId(req.getSellerId())
+                        // .sellerId(req.getSellerId())
                         .totalAmount(req.getTotalAmount())
-                        .orderName("주문명")
+                        .orderName(req.getOrderName())
                         .status(OrderStatus.PENDING.getCode())
                         .build();
 
@@ -118,19 +116,12 @@ public class OrderService {
         return orderMapper.toDomain(orderEntity);
     }
 
-    public Order completePayment(UUID orderId, UUID paymentId) {
-        log.info("결제 완료 처리 시작: orderId={}, paymentId={}", orderId, paymentId);
+    public Order completePayment(UUID orderId) {
+        log.info("결제 완료 처리 시작: orderId={}", orderId);
 
         OrderEntity order = findOrderOrThrow(orderId);
         // 실제 결제 완료 처리 요청청
-        Boolean paymentVerified = paymentClient.verifyPayment(
-            new PaymentClient.PaymentVerifyRequest(orderId, paymentId, order.getOrderName(), order.getTotalAmount())
-        );
-        if (!paymentVerified) {
-            appendOrderStatus(orderId, OrderStatus.CANCELLED);
-            throw new IllegalStateException("결제 실패");
-        }
-        log.info("결제 완료: orderId={}, paymentID={}", orderId, paymentId);
+        log.info("결제 완료: orderId={}", orderId );
 
         //결제 완료 테스트트
         // Boolean paymentVerified = true;
@@ -209,8 +200,8 @@ public class OrderService {
         return orderMapper.toDomain(order);
     }
     // 결제 취소 (배송전)
-    public Order delieveryBefore(UUID orderId, UUID paymentId) {
-        log.info("반품 처리 시작: orderId={}, paymentId={}", orderId, paymentId);
+    public Order delieveryBefore(UUID orderId) {
+        log.info("반품 처리 시작: orderId={}", orderId);
         
         OrderEntity order = findOrderOrThrow(orderId);
         DeliveryClient.DeliveryStatusResponse deliveryStatus = deliveryClient.getDeliveryStatus(orderId);
@@ -221,10 +212,10 @@ public class OrderService {
         
         //결제 취소 요청
         Boolean cancelPayment = paymentClient.cancelPayment(
-            new PaymentClient.PaymentCancelRequest(orderId, paymentId, order.getOrderName(), "반품")
+            new PaymentClient.PaymentCancelRequest(orderId, order.getOrderName(), "반품")
         );
         if (!cancelPayment) {
-            log.error("결제 취소 실패: orderId={}, paymentId={}", orderId, paymentId);
+            log.error("결제 취소 실패: orderId={}", orderId);
             throw new IllegalStateException("결제 취소에 실패했습니다.");
         }
         log.info("결제 취소 완료: orderId={}", orderId);
@@ -256,7 +247,7 @@ public class OrderService {
     }
 
     // 취소 로직(반송)
-    public Order cancel(UUID orderId, UUID paymentId) {
+    public Order cancel(UUID orderId) {
         OrderEntity order = findOrderOrThrow(orderId);
 
         //배송 상태 확인
@@ -274,10 +265,10 @@ public class OrderService {
           log.info("반송 요청 완료: orderId={}", orderId);
         //결제 취소 요청
         Boolean cancelPayment = paymentClient.cancelPayment(
-            new PaymentClient.PaymentCancelRequest(orderId, paymentId, order.getOrderName(), "반품")
+            new PaymentClient.PaymentCancelRequest(orderId, order.getOrderName(), "반품")
         );
         if (!cancelPayment) {
-            log.error("결제 취소 실패: orderId={}, paymentId={}", orderId, paymentId);
+            log.error("결제 취소 실패: orderId={}", orderId);
             throw new IllegalStateException("결제 취소에 실패했습니다.");
         }
         log.info("결제 취소 완료: orderId={}", orderId);
