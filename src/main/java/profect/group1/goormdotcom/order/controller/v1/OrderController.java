@@ -23,7 +23,7 @@ public class OrderController {
     // *POST /api/v1/orders
     @PostMapping
     public ResponseEntity<Order> create(@Valid @RequestBody OrderRequestDto req) {
-        Order order = orderService.create(req, req.getCustomerAddressId());
+        Order order = orderService.create(req);
         return ResponseEntity.ok(order);
     }
 

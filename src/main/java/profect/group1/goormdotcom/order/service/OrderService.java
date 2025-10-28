@@ -19,6 +19,7 @@ import profect.group1.goormdotcom.order.controller.dto.OrderRequestDto;
 import profect.group1.goormdotcom.order.domain.Order;
 import profect.group1.goormdotcom.order.domain.enums.OrderStatus;
 import profect.group1.goormdotcom.order.domain.mapper.OrderMapper; //?
+import profect.group1.goormdotcom.order.repository.OrderAddressRepository;
 import profect.group1.goormdotcom.order.repository.OrderProductRepository;
 import profect.group1.goormdotcom.order.repository.OrderRepository;
 import profect.group1.goormdotcom.order.repository.OrderStatusRepository;
@@ -39,6 +40,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final OrderAddressRepository orderAddressRepository;
     private final OrderMapper orderMapper;
     // private final StockRepository stockRepository;
 
@@ -70,8 +72,8 @@ public class OrderService {
     // 1) 주문 생성: 재고 선차감(예약) + 주문(PENDING) -> 주문 완료 하면 
     // 재고 확인 먼저
     @Transactional
-    public Order create(OrderRequestDto req, UUID customerAddressId) {
-        log.info("주문 생성 시작: customerId={}, itemCount={}", req.getCustomerId(), req.getItems().size());
+    public Order create(OrderRequestDto req) {
+        // log.info("주문 생성 시작: customerId={}, itemCount={}", req.getCustomerId(), req.getItems().size());
 
         // 재고 차감 (주문 생성 전 선차감)
         for (OrderItemDto itemDto : req.getItems()) {
@@ -115,6 +117,19 @@ public class OrderService {
         // 상태 이력 추가
         appendOrderStatus(orderEntity.getId(), OrderStatus.PENDING);
 
+        // address insert
+        OrderAddressEntity addressEntity = OrderAddressEntity.builder()
+            .orderId(orderEntity.getId())
+            .customerId(req.getCustomerId())
+            .address(req.getAddress())
+            .addressDetail(req.getAddressDetail())
+            .zipcode(req.getZipcode())
+            .phone(req.getPhone())
+            .name(req.getName())
+            .deliveryMemo(req.getDeliveryMemo())
+            .build();
+        orderAddressRepository.save(addressEntity);
+
         log.info("주문 생성 완료: orderId={}, orderName={}, status=결제대기", 
             orderEntity.getId(), orderEntity.getOrderName());
 
@@ -122,24 +137,13 @@ public class OrderService {
     public Order completePayment(UUID orderId) {
         log.info("결제 완료 처리 시작: orderId={}", orderId);
 
-        OrderEntity order = findOrderOrThrow(orderId);
-        
-        // 결제 검증
-        Boolean paymentVerified = paymentClient.verifyPayment(
-            new PaymentClient.PaymentVerifyRequest(orderId, order.getOrderName(), order.getTotalAmount())
-        );
-        
-        if (!paymentVerified) {
-            log.error("결제 검증 실패: orderId={}", orderId);
-            appendOrderStatus(orderId, OrderStatus.CANCELLED);
-            throw new IllegalStateException("결제 검증에 실패했습니다.");
-        }
-        log.info("결제 검증 완료: orderId={}", orderId);
+        OrderEntity orderEntity = findOrderOrThrow(orderId);
+        OrderAddressEntity addressEntity = orderAddressRepository.findByOrderId(orderId).orElseThrow(() -> new IllegalStateException("배송지 정보를 찾을 수 없습니다. orderId=" + orderId));
 
         // 배송 시작 
         ApiResponse<UUID> startResponse = deliveryClient.startDelivery(
             // TODO: 배송지 정보 추가 필요요
-            new DeliveryClient.StartDeliveryRequest(orderId, "", "")
+            new DeliveryClient.StartDeliveryRequest(orderId, orderEntity.getCustomerId(), addressEntity.getAddress(), addressEntity.getAddressDetail(), addressEntity.getZipcode(), addressEntity.getPhone(), addressEntity.getName(), addressEntity.getDeliveryMemo())
         );
 
         if (!startResponse.getCode().equals("COMMON200")) {
@@ -152,7 +156,7 @@ public class OrderService {
 
         // 주문 상태 업데이트       
         appendOrderStatus(orderId, OrderStatus.COMPLETED);
-        return orderMapper.toDomain(order);
+        return orderMapper.toDomain(orderEntity);
     }
     // 결제 취소 (배송전)
     public Order delieveryBefore(UUID orderId) {

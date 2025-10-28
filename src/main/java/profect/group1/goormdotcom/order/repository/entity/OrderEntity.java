@@ -16,6 +16,8 @@ import lombok.NoArgsConstructor;
 
 import profect.group1.goormdotcom.common.domain.BaseEntity;
 
+import org.hibernate.annotations.Comment;
+
 @Entity
 @Table(name = "p_order") // 실제 DB 테이블명
 @Getter
@@ -29,7 +31,9 @@ public class OrderEntity extends BaseEntity {
     private UUID id;
     
     private UUID customerId;
+    @Comment("deprecated")
     private UUID customerAddressId;
+    @Comment("deprecated")
     private UUID sellerId;
 
     // 재고와 연결

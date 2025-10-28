@@ -43,8 +43,8 @@ public interface DeliveryClient {
     @GetMapping("/internal/v1/delivery/status/{orderId}")
     DeliveryStatusResponse getDeliveryStatus(@PathVariable("orderId") UUID orderId);
 
-    @PostMapping("/internal/v1/delivery")
-    ApiResponse<UUID> createDelivery( @RequestBody CreateDeliveryRequest request);
+    // @PostMapping("/internal/v1/delivery")
+    // ApiResponse<UUID> createDelivery( @RequestBody CreateDeliveryRequest request);
 
     @PostMapping("/internal/v1/delivery/start")
     ApiResponse<UUID> startDelivery(@RequestBody StartDeliveryRequest request);
@@ -64,17 +64,18 @@ public interface DeliveryClient {
     @PostMapping("/internal/v1/delivery/return/{orderId}")
     Boolean requestReturn(@PathVariable("orderId") UUID orderId);
 
-
-
-    record CreateDeliveryRequest(
-        UUID orderId,
-        UUID customerAddressId
-    ) {}
     /**
      * 배송 요청 DTO
      */
     record StartDeliveryRequest(
-        UUID orderId
+        UUID orderId,
+        UUID customerId,
+        String address,
+        String addressDetail,
+        Stirng zipcode,
+        String phone,
+        String name,
+        String deliveryMemo
     ) {}
 
     /**
