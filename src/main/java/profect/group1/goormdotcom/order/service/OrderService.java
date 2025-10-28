@@ -138,7 +138,8 @@ public class OrderService {
 
         // 배송 시작 
         ApiResponse<UUID> startResponse = deliveryClient.startDelivery(
-            new DeliveryClient.StartDeliveryRequest(orderId, order.getCustomerAddressId(), order.getCustomerAddressId())
+            // TODO: 배송지 정보 추가 필요요
+            new DeliveryClient.StartDeliveryRequest(orderId, "", "")
         );
 
         if (!startResponse.getCode().equals("COMMON200")) {
