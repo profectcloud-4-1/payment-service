@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.product.controller.v1;
+package profect.group1.goormdotcom.product.controller.external.v1;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.UUID;
 
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
-import profect.group1.goormdotcom.product.controller.dto.DeleteProductRequestDto;
-import profect.group1.goormdotcom.product.controller.dto.ProductRequestDto;
-import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
-import profect.group1.goormdotcom.product.controller.dto.UpdateProductRequestDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.DeleteProductRequestDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.ProductRequestDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.ProductResponseDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.UpdateProductRequestDto;
 
 @Tag(name = "Product", description = "상품 API")
 public interface ProductApiDocs {

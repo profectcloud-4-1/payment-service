@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.product.controller.v1;
+package profect.group1.goormdotcom.product.controller.external.v1;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,11 +9,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.status.SuccessStatus;
-import profect.group1.goormdotcom.product.controller.dto.DeleteProductRequestDto;
-import profect.group1.goormdotcom.product.controller.dto.ProductRequestDto;
-import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
-import profect.group1.goormdotcom.product.controller.dto.UpdateProductRequestDto;
-import profect.group1.goormdotcom.product.controller.mapper.ProductDtoMapper;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.DeleteProductRequestDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.ProductRequestDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.ProductResponseDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.UpdateProductRequestDto;
+import profect.group1.goormdotcom.product.controller.external.v1.mapper.ProductDtoMapper;
 import profect.group1.goormdotcom.product.domain.Product;
 import profect.group1.goormdotcom.product.service.ProductService;
 

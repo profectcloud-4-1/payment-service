@@ -1,10 +1,10 @@
-package profect.group1.goormdotcom.product.controller.mapper;
+package profect.group1.goormdotcom.product.controller.external.v1.mapper;
 
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import profect.group1.goormdotcom.product.controller.dto.ProductResponseDto;
+import profect.group1.goormdotcom.product.controller.external.v1.dto.ProductResponseDto;
 import profect.group1.goormdotcom.product.domain.Product;
 import profect.group1.goormdotcom.product.domain.ProductImage;
 
