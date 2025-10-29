@@ -4,13 +4,8 @@ import profect.group1.goormdotcom.user.domain.User;
 import profect.group1.goormdotcom.user.service.dto.CreateUserDto;
 import profect.group1.goormdotcom.user.service.PasswordService;
 import profect.group1.goormdotcom.common.security.JwtTokenProvider;
-import profect.group1.goormdotcom.user.controller.dto.request.ListRequestDto;
 
 import org.springframework.stereotype.Service;
-import java.util.Optional;
-import java.util.List;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
 import org.springframework.transaction.annotation.Transactional;
