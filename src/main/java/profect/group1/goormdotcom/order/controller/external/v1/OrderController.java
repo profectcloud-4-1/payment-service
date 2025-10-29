@@ -51,4 +51,15 @@ public class OrderController {
     public ResponseEntity<Order> getOne(@PathVariable UUID id){
         return ResponseEntity.ok(orderService.getOne(id));
     }
+
+
+    //리뷰 서비스 orderid 조회
+    @GetMapping("/search")
+    public ResponseEntity<UUID> getOrderIdByCustomerAndProduct(
+            @RequestParam UUID customerId,
+            @RequestParam UUID productId) {
+        UUID orderId = orderService.getOrderIdByUserAndProduct(customerId, productId);
+        return ResponseEntity.ok(orderId);
+    }
+
 }

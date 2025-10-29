@@ -278,4 +278,12 @@ public class OrderService {
         return orderRepository.findById(id)
         .orElseThrow(() -> new IllegalArgumentException("주문을 찾을 수 없습니다. id=" + id));
     }
+
+    // userId + productId로 주문 조회
+    public UUID getOrderIdByUserAndProduct(UUID customerId, UUID productId) {
+        return orderRepository.findByCustomerIdAndProductId(customerId, productId)
+                .orElseThrow(() -> new IllegalStateException("주문을 찾을 수 없습니다."))
+                .getId();
+    }
+
 }
