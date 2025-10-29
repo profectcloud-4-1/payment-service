@@ -17,8 +17,8 @@ import profect.group1.goormdotcom.order.client.stock.dto.StockAdjustmentRequestD
 import profect.group1.goormdotcom.order.client.stock.dto.StockAdjustmentRequestItemDto;
 import profect.group1.goormdotcom.order.client.stock.dto.StockAdjustmentResponseDto;
 import profect.group1.goormdotcom.order.client.stock.StockClient;
-import profect.group1.goormdotcom.order.controller.dto.OrderItemDto;
-import profect.group1.goormdotcom.order.controller.dto.OrderRequestDto;
+import profect.group1.goormdotcom.order.controller.external.v1.dto.OrderItemDto;
+import profect.group1.goormdotcom.order.controller.external.v1.dto.OrderRequestDto;
 import profect.group1.goormdotcom.order.domain.Order;
 import profect.group1.goormdotcom.order.domain.enums.OrderStatus;
 import profect.group1.goormdotcom.order.domain.mapper.OrderMapper; //?

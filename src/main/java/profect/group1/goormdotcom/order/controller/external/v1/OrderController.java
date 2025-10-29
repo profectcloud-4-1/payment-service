@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.order.controller.v1;
+package profect.group1.goormdotcom.order.controller.external.v1;
 
 
 import java.util.UUID;
@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import profect.group1.goormdotcom.order.controller.dto.OrderRequestDto;
+import profect.group1.goormdotcom.order.controller.external.v1.dto.OrderRequestDto;
 import profect.group1.goormdotcom.order.service.OrderService;
 import profect.group1.goormdotcom.order.domain.Order;
 import profect.group1.goormdotcom.user.controller.auth.LoginUser;
@@ -26,12 +26,6 @@ public class OrderController {
     public ResponseEntity<Order> create(@Valid @RequestBody OrderRequestDto req, @LoginUser UUID userId) {
         Order order = orderService.create(userId,req);
         return ResponseEntity.ok(order);
-    }
-
-    //결제 완료
-    @PostMapping("/{orderId}/payment")
-    public ResponseEntity<Order> completePayment(@PathVariable UUID orderId){
-        return ResponseEntity.ok(orderService.completePayment(orderId));
     }
     
     //배송 전 취소 (환불)
