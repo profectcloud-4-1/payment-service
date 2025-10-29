@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.review.controller.dto;
+package profect.group1.goormdotcom.review.controller.external.v1.dto;
 
 
 import lombok.AllArgsConstructor;

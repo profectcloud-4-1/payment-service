@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import profect.group1.goormdotcom.review.controller.dto.CreateReviewRequestDto;
-import profect.group1.goormdotcom.review.controller.dto.ProductReviewListResponseDto;
-import profect.group1.goormdotcom.review.controller.dto.ReviewResponseDto;
-import profect.group1.goormdotcom.review.controller.dto.UpdatedReviewRequestDto;
+import profect.group1.goormdotcom.review.controller.external.v1.dto.CreateReviewRequestDto;
+import profect.group1.goormdotcom.review.controller.external.v1.dto.ProductReviewListResponseDto;
+import profect.group1.goormdotcom.review.controller.external.v1.dto.ReviewResponseDto;
+import profect.group1.goormdotcom.review.controller.external.v1.dto.UpdatedReviewRequestDto;
 import profect.group1.goormdotcom.review.service.ReviewService;
 
 import java.util.UUID;

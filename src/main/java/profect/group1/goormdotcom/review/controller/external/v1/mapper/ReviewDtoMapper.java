@@ -1,7 +1,7 @@
-package profect.group1.goormdotcom.review.controller.mapper;
+package profect.group1.goormdotcom.review.controller.external.v1.mapper;
 
-import profect.group1.goormdotcom.review.controller.dto.CreateReviewRequestDto;
-import profect.group1.goormdotcom.review.controller.dto.ReviewResponseDto;
+import profect.group1.goormdotcom.review.controller.external.v1.dto.CreateReviewRequestDto;
+import profect.group1.goormdotcom.review.controller.external.v1.dto.ReviewResponseDto;
 import profect.group1.goormdotcom.review.domain.Review;
 
 import java.util.UUID;
