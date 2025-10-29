@@ -66,41 +66,37 @@ public class StockService {
         StockEntity entity = stockRepository.deleteByProductId(productId);
         return StockMapper.toDomain(entity);
     }
-    
-    @Transactional
+
     public Boolean decreaseStocks(Map<UUID, Integer> requestedQuantityMap) {
-        StockEntity entity;
-        for (UUID productId: requestedQuantityMap.keySet()) {
-            int retryCount = 0;
-            
-            while (true) {
-                try {
-                    entity = getStockEntity(productId);
-                    adjustStockService.tryDecreaseQuantity(entity, requestedQuantityMap.get(productId));
-                    break;
-                } catch (InsufficientStockException e) {
+        int retryCount = 0;
+
+        while (true) {
+            try {
+                // 여러 건의 상품 재고 차감 트랜잭션
+                adjustStockService.tryDecreaseStocks(requestedQuantityMap);
+                break;
+            } catch (InsufficientStockException e) {
+                throw e;
+            } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
+                retryCount += 1;
+
+                if (retryCount > retryConfig.maxRetries()) {
+                    log.info("재고 차감 실패");
                     throw e;
-                } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
-                    retryCount += 1;
+                }
 
-                    if (retryCount > retryConfig.maxRetries()) {
-                        log.info("재고 차감 실패");
-                        throw e;
-                    }
-
-                    try {
-                        Thread.sleep(retryConfig.baseOffMs());
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        return false;
-                    }
+                try {
+                    Thread.sleep(retryConfig.baseOffMs());
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return false;
                 }
             }
         }
+
         return true;
     }
 
-    @Transactional
     public Boolean increaseStocks(Map<UUID, Integer> requestedQuantityMap) {
         StockEntity entity;
         for (UUID productId: requestedQuantityMap.keySet()) {
@@ -108,8 +104,8 @@ public class StockService {
             
             while (true) {
                 try {
-                    entity = getStockEntity(productId);
-                    adjustStockService.tryIncreaseQuantity(entity, requestedQuantityMap.get(productId));
+                    // 여러 건의 상품에 대해서 재고 증가 시도
+                    adjustStockService.tryIncreaseStocks(requestedQuantityMap);
                     break;
                 } catch (ObjectOptimisticLockingFailureException | StaleObjectStateException e) {
                     retryCount += 1;
