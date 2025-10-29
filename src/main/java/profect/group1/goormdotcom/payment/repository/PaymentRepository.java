@@ -21,8 +21,6 @@ public interface PaymentRepository extends JpaRepository<PaymentEntity, UUID>,
 
     Optional<PaymentEntity> findByOrderIdAndStatus(UUID orderId, String status);
 
-    Optional<PaymentEntity> findByOrderNumber(String orderNumber);
-
     Optional<PaymentEntity> findByPaymentKey(String paymentKey);
 
     boolean existsByPaymentKey(String paymentKey);

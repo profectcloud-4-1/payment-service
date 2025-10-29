@@ -10,9 +10,11 @@ import java.util.UUID;
 @Getter
 @Builder
 public class PaymentCreateRequestDto {
+    /*
     private UUID orderId;
     private String orderNumber;
     private String orderName;
-    private String payType;
+    private String paymentKey;
     private Long amount;
+     */
 }

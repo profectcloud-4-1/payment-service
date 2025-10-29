@@ -10,16 +10,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.*;
 import profect.group1.goormdotcom.common.domain.BaseEntity;
 
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Comment;
 import jakarta.persistence.Column;
 import lombok.Setter;
 import lombok.Builder;
 import lombok.ToString;
-import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
@@ -31,7 +28,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Entity
 @Table(name = "p_goorm_address")
 @Comment("구름닷컴 배송지")
-@Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 @SQLDelete(sql = "update p_goorm_address set deleted_at = NOW() where id = ?")
 public class GoormAddressEntity extends BaseEntity {
 

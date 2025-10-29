@@ -27,7 +27,8 @@ import profect.group1.goormdotcom.payment.domain.PaymentHistory;
 import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.domain.enums.TossPaymentStatus;
 import profect.group1.goormdotcom.payment.infrastructure.client.OrderClient;
-import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentResultDto;
+import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentFailResultDto;
+import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentSuccessResultDto;
 import profect.group1.goormdotcom.payment.repository.PaymentHistoryRepository;
 import profect.group1.goormdotcom.payment.repository.PaymentRepository;
 import profect.group1.goormdotcom.payment.repository.entity.PaymentEntity;
@@ -53,12 +54,13 @@ public class PaymentService {
     private final WebClient tossWebClient;
     private final OrderClient orderClient;
 
+    /*
     @Transactional
     public Payment requestPayment(PaymentCreateRequestDto dto, User user) {
         //권한 확인
-        /* if(!SecurityUtil.isCustomer()) {
+         if(!SecurityUtil.isCustomer()) {
             throw new PaymentHandler(ErrorStatus.INSUFFICIENT_ROLE);
-        }*/
+        }
 
         //TODO: OrderClient를 통해서 order에서 orderId 존재하는지 확인받기, 주문 정보 조회 및 금액 검증
 
@@ -99,6 +101,9 @@ public class PaymentService {
         return payment;
     }
 
+
+    */
+
     //TODO: Order에서 만들어서 넘어와야 함. 임시 구현, 추후 삭제
     private String generateOrderNumber() {
         var now = java.time.LocalDateTime.now();
@@ -108,20 +113,31 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentSuccessResponseDto tossPaymentSuccess(PaymentSuccessRequestDto dto) {
-        PaymentEntity paymentEntity = paymentRepository.findByOrderNumber(dto.getOrderId())
-                .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
+    public PaymentSuccessResponseDto tossPaymentSuccess(PaymentSuccessRequestDto dto, UUID userId) {
+        //처리중인 결제내역이 있는지 확인
+        if (dto.getOrderId() != null) {
+            paymentRepository.findByOrderIdAndStatus(dto.getOrderId(), "PAY0000")
+                    .ifPresent(existing -> {
+                        throw new PaymentHandler(ErrorStatus._DUPLICATE_PAYMENT_REQUEST);
+                    });
+        }
 
         //멱등성 체크-> 이미 처리된 paymentKey인지 확인
         if(paymentRepository.existsByPaymentKey(dto.getPaymentKey())) {
             return null;
         }
 
-        //히스토리 생성
-
         //금액 검증
-        if (!paymentEntity.getAmount().equals(dto.getAmount())) {
-            throw new PaymentHandler(ErrorStatus._INVALID_PAYMENT_AMOUNT);
+        //if (!paymentEntity.getAmount().equals(dto.getAmount())) {
+        //    throw new PaymentHandler(ErrorStatus._INVALID_PAYMENT_AMOUNT);
+        //}
+
+        //결제 생성
+        Payment payment = Payment.create(userId, dto.getOrderId(), dto.getOrderName(), dto.getPaymentKey(), dto.getAmount());
+
+        //1000원 이하면 결제X
+        if(payment.getAmount() < 1000) {
+            throw new PaymentHandler(ErrorStatus._BAD_REQUEST);
         }
 
         String authorizations = "Basic " + Base64.getEncoder().encodeToString((tossPaymentConfig.getSecretKey() + ":").getBytes());
@@ -149,10 +165,6 @@ public class PaymentService {
         } else {
             approvedAt = LocalDateTime.now();
         }
-        paymentEntity.setApprovedAt(approvedAt);
-        paymentEntity.setPaymentKey(dto.getPaymentKey());
-        paymentEntity.setStatus("PAY0001");
-        paymentEntity.setApprovedAt(response.approvedAt().toLocalDateTime());
 
         //offsetTime 직렬화를 위한 클래스
         ObjectMapper objectMapper = new ObjectMapper();
@@ -163,24 +175,28 @@ public class PaymentService {
             rawResponseJson = objectMapper.writeValueAsString(response);
         } catch (JsonProcessingException ignored) {}
 
+        payment.setStatus("PAY0001");
+
+        PaymentEntity savedEntity = paymentRepository.saveAndFlush(PaymentMapper.toEntity(payment));
+        payment.setId(savedEntity.getId());
+
         PaymentHistory history = PaymentHistory.create(
-                paymentEntity.getId(),
+                savedEntity.getId(),
                 "PAY0001",                 //결제 승인
-                paymentEntity.getAmount(),
-                paymentEntity.getPaymentKey(),
+                savedEntity.getAmount(),
+                savedEntity.getPaymentKey(),
                 rawResponseJson,
                 "SUCCESS"
         );
 
-        paymentRepository.save(paymentEntity);
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
 
         try {
-            orderClient.notifyPaymentResult(
-                    paymentEntity.getOrderId(),
-                    new PaymentResultDto(
+            orderClient.notifyPaymentSuccessResult(
+                    savedEntity.getOrderId(),
+                    new PaymentSuccessResultDto(
                             "PAY0001",                //결제 성공
-                            paymentEntity.getAmount(),
+                            savedEntity.getAmount(),
                             response.approvedAt()
                     )
             );
@@ -192,7 +208,7 @@ public class PaymentService {
 
     @Transactional
     public void tossPaymentFail(PaymentFailRequestDto dto) {
-        PaymentEntity paymentEntity = paymentRepository.findByOrderNumber(dto.getOrderId())
+        PaymentEntity paymentEntity = paymentRepository.findByOrderId(dto.getOrderId())
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
 
         PaymentHistory history = PaymentHistory.create(
@@ -208,6 +224,18 @@ public class PaymentService {
 
         paymentRepository.save(paymentEntity);
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
+
+        try {
+            orderClient.notifyPaymentFailResult(
+                    paymentEntity.getOrderId(),
+                    new PaymentFailResultDto(
+                            "PAY0002",                //결제 실패
+                            paymentEntity.getAmount()
+                    )
+            );
+        } catch (Exception e) {
+            log.error("[ORDER SYNC] 주문서비스 결제결과 전달 실패: {}", e.getMessage());
+        }
     }
 
     @Transactional

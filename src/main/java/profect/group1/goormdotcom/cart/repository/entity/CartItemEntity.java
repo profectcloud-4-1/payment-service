@@ -24,7 +24,7 @@ import profect.group1.goormdotcom.common.domain.BaseEntity;
 
 @Entity
 @Table(name = "p_cart_item")
-@Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 @SQLDelete(sql = "update p_cart_item set deleted_at = NOW(), cart_id = NULL where id = ?")
 @EntityListeners(AuditingEntityListener.class)
 public class CartItemEntity extends BaseEntity {

@@ -41,7 +41,6 @@ public interface PaymentClient {
      */
     record PaymentVerifyRequest(
         UUID orderId,
-        String orderName,
         int amount
     ) {}
 

@@ -16,7 +16,6 @@ public class PaymentDtoMapper {
     public static PaymentResponseDto toPaymentDto(Payment payment) {
         return new PaymentResponseDto(
                 payment.getId(),
-                payment.getPayType(),
                 payment.getStatus(),
                 payment.getAmount()
         );
@@ -40,11 +39,9 @@ public class PaymentDtoMapper {
 
         return new PaymentSearchResponseDto.Item(
                 payment.getId(),
-                payment.getOrderNumber(),
                 payment.getOrderName(),
                 payment.getAmount(),
                 payment.getStatus(),
-                payment.getPayType(),
                 statusAt,
                 approved,
                 canceled

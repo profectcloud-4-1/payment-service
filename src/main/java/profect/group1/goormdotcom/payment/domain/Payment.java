@@ -20,9 +20,7 @@ public class Payment {
     private UUID id;
     private UUID userId;
     private UUID orderId;
-    private String orderNumber;
     private String orderName;
-    private String payType;
     private String status;
     private Long amount;
     private Long canceledAmount;
@@ -35,16 +33,14 @@ public class Payment {
     public Payment(
             UUID userId,
             UUID orderId,
-            String orderNumber,
             String orderName,
-            String payType,
+            String paymentKey,
             Long amount
     ) {
         this.userId = userId;
         this.orderId = orderId;
-        this.orderNumber = orderNumber;
         this.orderName = orderName;
-        this.payType = payType;
+        this.paymentKey = paymentKey;
         this.amount = amount;
         this.canceledAmount = (long) 0;
         this.status = "PAY0000"; //DB에서 펜딩상태 긁어오기
@@ -52,15 +48,18 @@ public class Payment {
 
     public static Payment create(UUID userId,
                                  UUID orderId,
-                                 String orderNumber,
                                  String orderName,
-                                 String payType,
+                                 String paymentKey,
                                  Long amount) {
-        return new Payment(userId, orderId, orderNumber, orderName, payType, amount);
+        return new Payment(userId, orderId, orderName, paymentKey, amount);
     }
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public void markSuccess(String paymentKey, LocalDateTime approvedAt) {

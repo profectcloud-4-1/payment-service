@@ -11,6 +11,5 @@ import java.util.UUID;
 @Builder
 public class PaymentCancelRequestDto {
     private UUID orderId;
-    private String orderName;
     private String reason;
 }

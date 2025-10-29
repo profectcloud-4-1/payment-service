@@ -6,7 +6,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.EnumType;
-import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.annotations.*;
+
 import java.util.UUID;
 import java.time.LocalDateTime;
 import profect.group1.goormdotcom.user.domain.enums.UserRole;
@@ -17,9 +18,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import org.hibernate.annotations.Comment;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.SQLDelete;
 import profect.group1.goormdotcom.common.domain.BaseEntity;
 
 @Entity
@@ -31,7 +29,7 @@ import profect.group1.goormdotcom.common.domain.BaseEntity;
 @AllArgsConstructor
 @Builder
 @SQLDelete(sql = "update p_user set deleted_at = NOW() where id = ?")
-@Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 public class UserEntity extends BaseEntity {
     @Id
     @GeneratedValue

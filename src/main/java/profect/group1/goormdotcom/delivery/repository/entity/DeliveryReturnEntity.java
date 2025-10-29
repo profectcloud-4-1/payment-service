@@ -12,13 +12,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Builder;
+import org.hibernate.annotations.*;
 import profect.group1.goormdotcom.common.domain.BaseEntity;
 
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Comment;
 import jakarta.persistence.Column;
-import org.hibernate.annotations.UuidGenerator;
 
 @Getter
 @Setter
@@ -30,7 +27,7 @@ import org.hibernate.annotations.UuidGenerator;
 @Entity
 @Table(name = "p_delivery_return")
 @Comment("반송")
-@Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 @SQLDelete(sql = "update p_delivery_return set deleted_at = NOW() where id = ?")
 public class DeliveryReturnEntity extends BaseEntity {
 

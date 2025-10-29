@@ -40,14 +40,8 @@ public class PaymentEntity extends BaseEntity {
     @Column(name = "order_id", columnDefinition = "uuid", nullable = false)
     private UUID orderId;
 
-    @Column(name = "order_number", length = 200, nullable = false)
-    private String orderNumber;
-
     @Column(name = "order_name", length = 200, nullable = false)
     private String orderName;
-
-    @Column(name = "pay_type", nullable = false, length = 32)
-    private String payType;
 
     @Column(name = "status", nullable = false, length = 32)
     private String status;
@@ -69,11 +63,11 @@ public class PaymentEntity extends BaseEntity {
 
     public PaymentEntity(final UUID userId,
                          final UUID orderId,
-                         final String payType,
+                         final String paymentKey,
                          final Long amount) {
         this.userId = userId;
         this.orderId = orderId;
-        this.payType = payType;
+        this.paymentKey = paymentKey;
         this.amount = amount;
         this.status = "PENDING"; //DB에서 펜딩상태 긁어오기
     }

@@ -6,6 +6,7 @@ import lombok.*;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.UuidGenerator;
 
 import profect.group1.goormdotcom.common.domain.BaseEntity;
@@ -25,7 +26,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @SQLDelete(sql = "update p_file_upload set deleted_at = NOW() where id = ?")
-@Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 public class FileUpload extends BaseEntity {
     @Id
     @UuidGenerator

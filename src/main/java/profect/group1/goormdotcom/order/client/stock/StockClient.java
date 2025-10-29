@@ -38,7 +38,7 @@ public interface StockClient {
      * @param quantity 차감할 수량
      * @return 차감 결과
      */
-    @PostMapping("/api/v1/stock/decrease")
+    @PostMapping("/internal/v1/stock/decrease")
     ApiResponse<StockAdjustmentResponseDto> decreaseStocks(@RequestBody StockAdjustmentRequestDto stockAdjustmentRequestDto);
 
     /**
@@ -47,7 +47,6 @@ public interface StockClient {
      * @param quantity 복구할 수량
      * @return 복구 결과
      */
-    @PostMapping("/api/v1/stock/increase/{productId}")
-    ApiResponse<StockAdjustmentResponseDto> increaseStock(@PathVariable("productId") UUID productId,
-                          @RequestParam("quantity") int quantity);
+    @PostMapping("/internal/v1/stock/increase")
+    ApiResponse<StockAdjustmentResponseDto> increaseStock(@RequestBody StockAdjustmentRequestDto stockAdjustmentRequestDto);
 }

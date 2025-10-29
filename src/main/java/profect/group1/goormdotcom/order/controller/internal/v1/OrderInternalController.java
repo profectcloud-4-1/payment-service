@@ -19,9 +19,18 @@ public class OrderInternalController {
     private final OrderService orderService;
 
     //결제 완료
-    @PostMapping("/{orderId}/payment")
+    @PostMapping("/{orderId}/payment/success")
     public ResponseEntity<Order> completePayment(@PathVariable UUID orderId){
         return ResponseEntity.ok(orderService.completePayment(orderId));
+    }
+
+    //결제 실패
+    //재고 원복
+    //주문 상태 실패로 변경
+    //주문 히스토리 저장
+    @PostMapping("/{orderId}/payment/fail")
+    public ResponseEntity<Order> failPayment(@PathVariable UUID orderId) {
+        return ResponseEntity.ok(orderService.failPayment(orderId));
     }
  
 }

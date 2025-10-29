@@ -11,9 +11,6 @@ import java.time.OffsetDateTime;
 public record PaymentSuccessResponseDto (
         String mId,
         String paymentKey,
-
-        @JsonProperty("orderNumber")
-        @JsonAlias("orderId")
         String orderId,
         String orderName,
         String status,

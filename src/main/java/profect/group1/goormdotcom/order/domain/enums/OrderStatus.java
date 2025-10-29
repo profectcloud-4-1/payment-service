@@ -12,7 +12,8 @@ public enum OrderStatus {
     // PAID,
     // CREATED,
     COMPLETED("ORD0002", "완료"),
-    CANCELLED("ORD0003", "취소");
+    CANCELLED("ORD0003", "취소"),
+    FAILED("ORD0004", "실패");
 
     private final String code;
     private final String label;

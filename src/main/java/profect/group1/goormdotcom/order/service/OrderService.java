@@ -167,6 +167,41 @@ public class OrderService {
         appendOrderStatus(orderId, OrderStatus.COMPLETED);
         return orderMapper.toDomain(orderEntity);
     }
+
+    public Order failPayment(UUID orderId) {
+        log.info("결제 실패 처리 시작: orderId={}", orderId);
+
+        OrderEntity orderEntity = findOrderOrThrow(orderId);
+
+        List<OrderProductEntity> products = orderProductRepository.findByOrderId(orderId);
+
+        //재고 원복 요청 바디 구성
+        StockAdjustmentRequestDto req = new StockAdjustmentRequestDto(
+                products.stream()
+                        .map(p -> new StockAdjustmentRequestItemDto(
+                                p.getProductId(),
+                                p.getQuantity()   //주문 시 차감했던 수량
+                        ))
+                        .toList()
+        );
+
+        ApiResponse<StockAdjustmentResponseDto> stockResponse = stockClient.increaseStock(req);
+
+        if (stockResponse == null
+                || stockResponse.getResult() == null
+                || !stockResponse.getResult().status()) {
+            log.error("재고 복구 실패: orderId={}, productIds={}",
+                    orderId, products.stream().map(OrderProductEntity::getProductId).toList());
+            throw new IllegalStateException("재고 복구에 실패했습니다.");
+        }
+
+        log.info("재고 복구 완료: orderId={}", orderId);
+
+        //TODO:히스토리저장
+        appendOrderStatus(orderId, OrderStatus.FAILED);
+        return orderMapper.toDomain(orderEntity);
+    }
+
     // 결제 취소 (배송전)
     public Order delieveryBefore(UUID orderId) {
         log.info("취소 처리 시작: orderId={}", orderId);

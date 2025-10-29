@@ -6,6 +6,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
@@ -20,6 +21,8 @@ import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.service.PaymentService;
 
 import org.springframework.data.domain.Pageable;
+import profect.group1.goormdotcom.user.domain.User;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -32,8 +35,9 @@ public class PaymentController implements PaymentApiDocs {
 
     @Override
     @GetMapping("/toss/success")
-    public ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(@ModelAttribute @Valid PaymentSuccessRequestDto paymentSuccessRequestDto) {
-        return ApiResponse.onSuccess(paymentService.tossPaymentSuccess(paymentSuccessRequestDto));
+    public ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(@ModelAttribute @Valid PaymentSuccessRequestDto paymentSuccessRequestDto ,
+                                                                     @RequestParam UUID userId) {
+        return ApiResponse.onSuccess(paymentService.tossPaymentSuccess(paymentSuccessRequestDto, userId));
     }
 
     @Override

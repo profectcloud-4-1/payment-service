@@ -1,6 +1,7 @@
 
 package profect.group1.goormdotcom.order.repository.entity;
 
+import org.hibernate.annotations.SQLRestriction;
 import profect.group1.goormdotcom.common.domain.BaseEntity;
 
 import jakarta.persistence.*;
@@ -20,7 +21,7 @@ import org.hibernate.annotations.SQLDelete;
 @Builder
 @Entity
 @Table(name = "p_order_address")
-@Filter(name = "deletedFilter", condition = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 @SQLDelete(sql = "update p_order_address set deleted_at = NOW() where id = ?")
 public class OrderAddressEntity extends BaseEntity {
 

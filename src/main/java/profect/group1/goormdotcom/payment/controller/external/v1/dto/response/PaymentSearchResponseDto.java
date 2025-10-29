@@ -13,11 +13,9 @@ public record PaymentSearchResponseDto (
 )  {
     public record Item(
             UUID paymentId,
-            String orderNumber,
             String orderName,
             Long amount,
             String status,
-            String payType,
             LocalDateTime statusAt,
             LocalDateTime approvedAt,
             LocalDateTime cancelledAt

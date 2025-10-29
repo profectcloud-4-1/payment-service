@@ -43,7 +43,8 @@ public interface PaymentApiDocs {
             )
     })
     profect.group1.goormdotcom.apiPayload.ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(
-            @ModelAttribute @Valid PaymentSuccessRequestDto paymentSuccessRequestDto
+            @ModelAttribute @Valid PaymentSuccessRequestDto paymentSuccessRequestDto,
+            @RequestParam UUID userId
     );
 
     @Operation(
