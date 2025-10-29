@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.review.controller.v1;
+package profect.group1.goormdotcom.review.controller.external.v1;
 
 
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/reviews")
 @RequiredArgsConstructor
-public class ReviewController {
+public class ReviewController implements ReviewApiDocs{
     private final ReviewService reviewService;
 
     /**
@@ -60,7 +60,7 @@ public class ReviewController {
             @Valid @RequestBody UpdatedReviewRequestDto request,
             @RequestHeader("X-User-Id") UUID userId
     ) {
-        // TODO: Service 구현 후 연결
+
         // 임시: userId 없으면 더미 값 사용
         if (userId == null) {
             userId = UUID.fromString("00000000-0000-0000-0000-000000000001");
@@ -80,7 +80,7 @@ public class ReviewController {
             @PathVariable UUID reviewId,
             @RequestHeader(value = "X-User-Id", required = false) UUID userId
     ) {
-        // TODO: Service 구현 후 연결
+
         // 임시: userId 없으면 더미 값 사용
         if (userId == null) {
             userId = UUID.fromString("00000000-0000-0000-0000-000000000001");

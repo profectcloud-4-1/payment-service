@@ -2,7 +2,7 @@ package profect.group1.goormdotcom.review.repository.entity;
 
 
 import jakarta.persistence.*;
-import lombok.Builder;
+import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -14,9 +14,37 @@ import java.util.UUID;
 @SQLDelete(sql = "UPDATE p_review_image SET deleted_at = NOW() WHERE id = ?")
 @Where(clause = "deleted_at IS NULL")
 @Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)  // ✅ JPA용 기본 생성자
+@AllArgsConstructor
 public class ReviewImageEntity {
 
     @Id
+    private UUID id;
+
+    @PrePersist
+    public void prePersist() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
+    }
+
+    @Column(name = "review_id", nullable = false)
+    private UUID reviewId;
+
+    @Column(name = "file_id", nullable = false)  // ✅ 컬럼명 명시
+    private UUID fileId;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    /*@Id
     private UUID id;
 
     // jpa 에러 방지용
@@ -65,5 +93,5 @@ public class ReviewImageEntity {
     public UUID getFileId() { return fileId; }
     // String getImageObject() { return imageObject; }
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }*/
 }

@@ -30,12 +30,26 @@ public class ReviewDtoMapper {
      * 응답: review_id, user_id, rating, content, image_url, created_at
      */
 
+    //image url 없이
     public static ReviewResponseDto toResponseDto(Review review) {
+        return new ReviewResponseDto(
+                review.getId(),
+                review.getRating(),
+                review.getUserId(),
+                review.getContent(),
+                null,  // imageUrl 없음
+                review.getCreatedAt()
+        );
+    }
+
+    // image url 포함
+    public static ReviewResponseDto toResponseDto(Review review,String imageUrl) {
         return new ReviewResponseDto(
                 review.getId(),          // reviewId
                 review.getRating(),      // rating
                 review.getUserId(),      // userId
-                review.getContent(),     // content
+                review.getContent(),
+                imageUrl,
                 review.getCreatedAt()    // createdAt
         );
     }

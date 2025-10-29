@@ -3,18 +3,20 @@ package profect.group1.goormdotcom.review.service;
 import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+//import lombok.Value;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
 import profect.group1.goormdotcom.review.controller.external.v1.dto.CreateReviewRequestDto;
 import profect.group1.goormdotcom.review.controller.external.v1.dto.ProductReviewListResponseDto;
 import profect.group1.goormdotcom.review.controller.external.v1.dto.ReviewResponseDto;
@@ -27,10 +29,12 @@ import profect.group1.goormdotcom.review.repository.entity.ReviewEntity;
 import profect.group1.goormdotcom.review.repository.entity.ReviewImageEntity;
 import profect.group1.goormdotcom.review.repository.mapper.ReviewMapper;
 
+import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -46,6 +50,8 @@ public class ReviewService {
     private final PresignedClient presignedClient;
     private final OrderClient orderClient;
 
+    @Value("${aws.cloudfront.domain}")
+    private String cloudfrontDomain;
 
     /**
      * 리뷰 생성 (POST)
@@ -129,7 +135,10 @@ public class ReviewService {
      * @return 리뷰 목록 응답
      */
 
+
     public ProductReviewListResponseDto getProductReviews(UUID productId, int page, int size, String sortBy) {
+
+
         // 1. 페이징 및 정렬 설정
         Sort sort = sortBy.equals("rating")
                 ? Sort.by(Sort.Direction.DESC, "rating")
@@ -139,36 +148,8 @@ public class ReviewService {
         // 2. 리뷰 목록 조회
         Page<ReviewEntity> reviewPage = reviewRepository.findByProductId(productId, pageable);
 
-        // 3. 각 리뷰에 presigned URL 매핑
-        /*List<ReviewResponseDto> reviewResponses = reviewPage.getContent().stream()
-            .map(reviewEntity -> {
-            // 3-1. 리뷰에 연결된 이미지 정보 조회
-            UUID fileId = reviewImageRepository.findByReviewId(reviewEntity.getId())
-                    .map(ReviewImageEntity::getFileId)
-                    .orElse(null);
-
-            String presignedUrl = null;
-
-            // 3-2. presigned 서비스 호출 (FeignClient)
-            if (fileId != null) {
-                try {
-                    ResponseEntity<ObjectKeyResponseDto> response = presignedClient.getObjectKey(fileId);
-                    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                        presignedUrl = response.getBody().getObjectKey(); // 또는 getPresignedUrl()
-                    }
-                } catch (Exception e) {
-                    // presigned 서비스 호출 실패 시 로그만 출력
-                    log.warn("Failed to fetch presigned URL for fileId: {}", fileId, e);
-                }
-            }
-
-            // 3-3. 도메인 객체 생성 및 DTO 변환
-            Review review = ReviewMapper.toDomain(reviewEntity);
-            return ReviewDtoMapper.toResponseDto(review);
-        })
-        .toList();*/
         // 3. 각 리뷰 도메인 매핑 및 DTO 변환
-        List<ReviewResponseDto> reviewResponses = reviewPage.getContent().stream()
+        /*List<ReviewResponseDto> reviewResponses = reviewPage.getContent().stream()
                 .map(reviewEntity -> {
                     // 리뷰 도메인 객체 생성 (이미지 URL 제외)
                     Review review = ReviewMapper.toDomain(reviewEntity);
@@ -176,7 +157,42 @@ public class ReviewService {
                     // DTO 변환
                     return ReviewDtoMapper.toResponseDto(review);
                 })
+                .toList();*/
+        // 3. ProductImageEntity -> presigned URL 매핑 및 도메인 변환
+        List<ReviewResponseDto> reviewResponses = reviewPage.getContent().stream()
+                .map(reviewEntity -> {
+                    String imageUrl = null;
+
+                    // 리뷰에 연결된 이미지 조회
+                    Optional<ReviewImageEntity> imageEntities = reviewImageRepository.findByReviewId(reviewEntity.getId());
+
+                    if (!imageEntities.isEmpty()) {
+                        ReviewImageEntity imageEntity = imageEntities.get();
+
+                        try {
+                            // ✅ 여기서 fileId로 ObjectKey 조회
+                            ResponseEntity<ObjectKeyResponseDto> response =
+                                    presignedClient.getObjectKey(imageEntity.getFileId());
+
+                            ObjectKeyResponseDto objectKeyResponse = response.getBody();
+
+                            // ✅ ObjectKey를 받아서 CloudFront URL 생성
+                            if (objectKeyResponse != null && objectKeyResponse.getObjectKey() != null) {
+                                imageUrl = cloudfrontDomain + "/" + objectKeyResponse.getObjectKey();
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to fetch object key for fileId: {}", imageEntity.getFileId(), e);
+                        }
+                    }
+
+                    // 리뷰 도메인 객체 생성
+                    Review review = ReviewMapper.toDomain(reviewEntity);
+
+                    // DTO 변환 (이미지 URL 포함)
+                    return ReviewDtoMapper.toResponseDto(review, imageUrl);
+                })
                 .toList();
+
 
         // 4. 통계 정보 조회
         Double averageRating = reviewRepository.findAverageRatingByProductId(productId);
@@ -257,12 +273,6 @@ public class ReviewService {
         );
 
 
-        // 7. 응답 반환
-        /*String finalImageUrl = request.getImageUrl() != null
-                ? request.getImageUrl()
-                : existingImageUrl;
-        Review savedReview = ReviewMapper.toDomain(updatedEntity);
-        return ReviewDtoMapper.toResponseDto(savedReview);*/
 
         Review savedReview = ReviewMapper.toDomain(updatedEntity);
         return ReviewDtoMapper.toResponseDto(savedReview);
