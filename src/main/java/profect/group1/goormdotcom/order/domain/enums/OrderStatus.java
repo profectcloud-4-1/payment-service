@@ -4,9 +4,11 @@ import java.util.Arrays;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @RequiredArgsConstructor
+@Schema(description = "주문 상태")
 public enum OrderStatus {
     PENDING("ORD0001", "대기"),
     // PAID,
