@@ -170,7 +170,7 @@ public class ProductService {
             
             // TODO: cloudfront 도메인을 presigned에서 처리하는게 더 좋을 듯
             // 도메인 변경될때 이 변경에 대응할 책임이 presigned에 있다고 보임.
-            urlMapping.put(imageEntity,  cloudfrontDomain + "/" + objectKeyResponse.getObjectKey());
+            urlMapping.put(imageEntity,  cloudfrontDomain + objectKeyResponse.getObjectKey());
         }
         
         List<ProductImage> images = urlMapping.keySet().stream()
