@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    config:
+      uri: http://127.0.0.1:8887 #config 서버 ip:port
+  profiles:
+    active: dev
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh

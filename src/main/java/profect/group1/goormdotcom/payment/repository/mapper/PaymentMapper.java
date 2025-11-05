@@ -1,9 +1,7 @@
 package profect.group1.goormdotcom.payment.repository.mapper;
 
 import org.springframework.stereotype.Component;
-import profect.group1.goormdotcom.cart.domain.Cart;
 import profect.group1.goormdotcom.payment.domain.Payment;
-import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.repository.entity.PaymentEntity;
 
 @Component

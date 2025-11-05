@@ -40,6 +40,7 @@ dependencies {
 
 	// feign client
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
 
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0'
 	compileOnly 'org.projectlombok:lombok'
@@ -59,12 +60,20 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-  //aws s3
-  implementation platform('software.amazon.awssdk:bom:2.25.40')
-  implementation 'software.amazon.awssdk:s3'
+    //aws s3
+    implementation platform('software.amazon.awssdk:bom:2.25.40')
+    implementation 'software.amazon.awssdk:s3'
 
     //JSON 직/역직렬화
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    //Eureka Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    
+    //Config Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 dependencyManagement {
