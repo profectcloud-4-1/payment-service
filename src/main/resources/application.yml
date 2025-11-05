@@ -5,6 +5,10 @@ spring:
     active: dev
     include: secret
 
+  config:
+    import:
+      "configserver:"
+
 management:
   endpoints:
     web:

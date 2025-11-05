@@ -10,7 +10,7 @@ import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentSucce
 import java.util.UUID;
 
 @FeignClient(
-        name = "payment-to-order",
+        name = "${spring.cloud.client.config.payment-to-order.name}",
         fallback = OrderClientFallBack.class
 )
 public interface OrderClient {
