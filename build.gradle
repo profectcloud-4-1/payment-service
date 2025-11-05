@@ -67,6 +67,9 @@ dependencies {
     //JSON 직/역직렬화
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
+    //Eureka Client
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    
     //Config Client
     implementation 'org.springframework.cloud:spring-cloud-starter-config'
     implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
