@@ -22,7 +22,6 @@ import profect.group1.goormdotcom.payment.controller.external.v1.dto.request.Pay
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.request.PaymentSuccessRequestDto;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentSearchResponseDto;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentSuccessResponseDto;
-import profect.group1.goormdotcom.user.domain.User;
 
 import org.springframework.data.domain.Pageable;
 import java.util.UUID;

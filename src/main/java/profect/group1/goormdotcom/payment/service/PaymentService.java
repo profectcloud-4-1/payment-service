@@ -34,7 +34,6 @@ import profect.group1.goormdotcom.payment.repository.PaymentRepository;
 import profect.group1.goormdotcom.payment.repository.entity.PaymentEntity;
 import profect.group1.goormdotcom.payment.repository.mapper.PaymentHistoryMapper;
 import profect.group1.goormdotcom.payment.repository.mapper.PaymentMapper;
-import profect.group1.goormdotcom.user.domain.User;
 
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;

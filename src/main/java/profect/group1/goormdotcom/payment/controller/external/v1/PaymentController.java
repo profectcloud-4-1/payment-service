@@ -21,7 +21,6 @@ import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.service.PaymentService;
 
 import org.springframework.data.domain.Pageable;
-import profect.group1.goormdotcom.user.domain.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
