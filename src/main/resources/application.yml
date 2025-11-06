@@ -2,8 +2,7 @@ spring:
   application:
     name: "payment-service"
   profiles:
-    active: dev
-    include: secret
+    active: ${PAYMENT_PROFILE:dev}
 
 management:
   endpoints:

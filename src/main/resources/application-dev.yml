@@ -1,0 +1,48 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        default_batch_fetch_size: 200
+        format_sql: true
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 5000
+
+springdoc:
+  use-fqn: true
+
+server:
+  port: ${SERVER_PORT}
+
+service:
+  product:
+    url: ${PRODUCT_SERVICE_URL}
+  order:
+    url: ${ORDER_SERVICE_URL}
+  payment:
+    url: ${PAYMENT_SERVICE_URL}
+
+payment:
+  toss:
+    client_api_key: ${TOSS_CLIENT_API_KEY}
+    secret_api_key: ${TOSS_SECRET_API_KEY}
+    success_url: ${TOSS_SUCCESS_URL}
+    fail_url: ${TOSS_FAIL_URL}
