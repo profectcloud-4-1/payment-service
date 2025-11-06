@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Getter
 public class TossPaymentConfig {
-    @Value("${secret.toss.client_api_key}")
+    @Value("${TOSS_CLIENT_API_KEY}")
     private String clientApiKey;
-    @Value("${secret.toss.secret_api_key}")
+    @Value("${TOSS_SECRET_API_KEY}")
     private String secretKey;
-    @Value("${secret.toss.success_url}")
+    @Value("${TOSS_SUCCESS_URL}")
     private String successUrl;
-    @Value("${secret.toss.fail_url}")
+    @Value("${TOSS_FAIL_URL}")
     private String failUrl;
 
     public static final String URL = "https://api.tosspayments.com/v1/payments/";
