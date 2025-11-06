@@ -37,9 +37,8 @@ out/
 .vscode/
 
 ### resources ###
-/src/main/resources/*
-!/src/main/resources/application.yml
-!/src/main/resources/bootstrap.yml
+/src/main/resources/application-secret.yml
+.env
 
 ### application profiles ###
 config/application-*.yml
