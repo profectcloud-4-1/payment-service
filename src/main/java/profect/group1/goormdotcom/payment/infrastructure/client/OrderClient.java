@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @FeignClient(
         name = "payment-to-order",
+        url = "${service.order.url}",
         fallback = OrderClientFallBack.class
 )
 public interface OrderClient {
