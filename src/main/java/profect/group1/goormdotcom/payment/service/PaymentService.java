@@ -401,7 +401,7 @@ public class PaymentService {
 
         List<Payment> filtered = slice.getContent().stream()
                 .map(PaymentMapper::toDomain)
-                .filter(p -> requestDto.getStatus() == null || p.getStatus() == requestDto.getStatus())
+                .filter(p -> requestDto.getStatus() == null || p.getStatus().equals(requestDto.getStatus()))
                 .filter(p -> {
                     LocalDateTime base = p.getCanceledAt() != null ? p.getCanceledAt()
                             : p.getApprovedAt() != null ? p.getApprovedAt()
