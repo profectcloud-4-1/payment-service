@@ -1,0 +1,49 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # 테스트 시에는 매번 초기화
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        default_batch_fetch_size: 100
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 1000
+            readTimeout: 1000
+
+springdoc:
+  use-fqn: true
+
+server:
+  port: 0   # 테스트 환경에서는 임의 포트 사용
+
+service:
+  product:
+    url: http://localhost:8081   # mock or test double endpoint
+  order:
+    url: http://localhost:8082
+  payment:
+    url: http://localhost:8083
+
+payment:
+  toss:
+    client_api_key: test-client-key
+    secret_api_key: test-secret-key
+    success_url: http://localhost:8080/test/success
+    fail_url: http://localhost:8080/test/fail
