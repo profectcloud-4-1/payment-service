@@ -1,4 +1,4 @@
-name: Product-service dev-branch push workflow
+name: payment-service dev-branch push workflow
 
 on:
   push:
@@ -85,10 +85,10 @@ jobs:
             docker pull "$IMAGE" 
             
             echo "== 기존 컨테이너 종료 및 삭제=="
-            docker stop product-service
-            docker remove product-service
+            docker stop payment-service
+            docker remove payment-service
             
             echo "== 새 컨테이너 실행 =="
-            docker-compose up -d product-service
+            docker-compose up -d payment-service
 
             echo "배포 완료"
