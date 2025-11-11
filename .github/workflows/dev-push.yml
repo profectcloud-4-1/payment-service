@@ -85,8 +85,7 @@ jobs:
             docker pull "$IMAGE" 
             
             echo "== 기존 컨테이너 종료 및 삭제=="
-            docker stop payment-service
-            docker remove payment-service
+            docker rm -f user-service 2>/dev/null || true
             
             echo "== 새 컨테이너 실행 =="
             docker-compose up -d payment-service
