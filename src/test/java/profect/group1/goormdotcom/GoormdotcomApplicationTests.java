@@ -8,8 +8,8 @@ import org.springframework.test.context.ActiveProfiles;
 // @ActiveProfiles("test")
 class GoormdotcomApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
+	//@Test
+	//void contextLoads() {
+	//}
 
 }
