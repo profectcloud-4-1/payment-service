@@ -1,8 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: test
-
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
@@ -11,39 +7,36 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop  # 테스트 시에는 매번 초기화
-    show-sql: true
-    open-in-view: false
+      ddl-auto: create-drop   # 테스트할 때마다 스키마 새로 만들고 끝나면 드롭
     properties:
       hibernate:
         format_sql: true
-        default_batch_fetch_size: 100
+        show_sql: true
+    open-in-view: false
 
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            connectTimeout: 1000
-            readTimeout: 1000
+  h2:
+    console:
+      enabled: true           # 필요 없으면 빼도 됨
 
-springdoc:
-  use-fqn: true
+  sql:
+    init:
+      mode: never             # 굳이 data.sql, schema.sql 안쓰면 never로 둬도 됨
 
 server:
-  port: 0   # 테스트 환경에서는 임의 포트 사용
+  port: 8765
 
 service:
-  product:
-    url: http://localhost:8081   # mock or test double endpoint
+  user:
+    url: http://localhost:8080
   order:
-    url: http://localhost:8082
+    url: http://localhost:8080
   payment:
-    url: http://localhost:8083
+    url: http://localhost:8080
 
 payment:
   toss:
-    client_api_key: test-client-key
-    secret_api_key: test-secret-key
-    success_url: http://localhost:8080/test/success
-    fail_url: http://localhost:8080/test/fail
+    client_api_key: test-key
+    secret_api_key: test-key
+    success_url: http://localhost:8080
+    fail_url: http://localhost:8080
+
