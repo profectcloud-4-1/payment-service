@@ -2,39 +2,27 @@ package profect.group1.goormdotcom.payment.controller.external.v1;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.request.*;
-import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentCancelResponseDto;
-import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentResponseDto;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentSearchResponseDto;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentSuccessResponseDto;
-import profect.group1.goormdotcom.payment.controller.external.v1.mapper.PaymentDtoMapper;
-import profect.group1.goormdotcom.payment.domain.Payment;
-import profect.group1.goormdotcom.payment.domain.enums.Status;
 import profect.group1.goormdotcom.payment.service.PaymentService;
 
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/payments")
-public class PaymentController implements PaymentApiDocs {
+public class PaymentExternalController implements PaymentApiDocs {
     private final PaymentService paymentService;
 
     @Override
     @GetMapping("/toss/success")
-    public ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(@ModelAttribute @Valid PaymentSuccessRequestDto paymentSuccessRequestDto ,
+    public ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(@ModelAttribute @Validated PaymentSuccessRequestDto paymentSuccessRequestDto ,
                                                                      @RequestParam UUID userId) {
         return ApiResponse.onSuccess(paymentService.tossPaymentSuccess(paymentSuccessRequestDto, userId));
     }
