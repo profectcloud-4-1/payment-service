@@ -1,6 +1,5 @@
 package profect.group1.goormdotcom.common.logging;
 
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +33,14 @@ public class TopExceptionBridgeFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
 
-        //로깅 요청 ID
+        String uri = req.getRequestURI();
+
+        if(uri.equals("/actuator/health") || uri.startsWith("/actuator/health/")) {
+            chain.doFilter(req, res);
+            return;
+        }
+
+        // 로깅 요청 ID
         String requestId = UUID.randomUUID().toString();
 
         req.setAttribute("X-Request-ID", requestId);
