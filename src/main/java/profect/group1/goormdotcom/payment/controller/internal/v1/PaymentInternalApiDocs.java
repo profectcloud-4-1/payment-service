@@ -8,7 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import profect.group1.goormdotcom.common.auth.LoginUser;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentCancelResponseDto;
+
+import java.util.UUID;
 
 @Tag(name = "결제 내부", description = "결제 관련 내부 API")
 public interface PaymentInternalApiDocs {
@@ -25,6 +28,7 @@ public interface PaymentInternalApiDocs {
             )
     })
     profect.group1.goormdotcom.apiPayload.ApiResponse<PaymentCancelResponseDto> tossPaymentCancel(
-            @ModelAttribute @Valid profect.group1.goormdotcom.payment.controller.external.v1.dto.request.PaymentCancelRequestDto paymentCancelRequestDto
+            @ModelAttribute @Valid profect.group1.goormdotcom.payment.controller.external.v1.dto.request.PaymentCancelRequestDto paymentCancelRequestDto,
+            @LoginUser UUID userId
     );
 }

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import profect.group1.goormdotcom.common.auth.LoginUser;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.request.PaymentSearchRequestDto;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentCancelResponseDto;
 import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentResponseDto;
@@ -43,7 +44,7 @@ public interface PaymentApiDocs {
     })
     profect.group1.goormdotcom.apiPayload.ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(
             @ModelAttribute @Valid PaymentSuccessRequestDto paymentSuccessRequestDto,
-            @RequestParam UUID userId
+            @LoginUser UUID userId
     );
 
     @Operation(
@@ -59,7 +60,8 @@ public interface PaymentApiDocs {
             )
     })
     profect.group1.goormdotcom.apiPayload.ApiResponse<Void> tossPaymentFail(
-            @ModelAttribute @Valid PaymentFailRequestDto paymentFailRequestDto
+            @ModelAttribute @Valid PaymentFailRequestDto paymentFailRequestDto,
+            @LoginUser UUID userId
     );
 
     @Operation(
@@ -83,6 +85,7 @@ public interface PaymentApiDocs {
     profect.group1.goormdotcom.apiPayload.ApiResponse<
             profect.group1.goormdotcom.payment.controller.external.v1.dto.response.PaymentSearchResponseDto> searchPayment(
             @ModelAttribute PaymentSearchRequestDto paymentSearchRequestDto,
-            Pageable pageable
+            Pageable pageable,
+            @LoginUser UUID userId
     );
 }
