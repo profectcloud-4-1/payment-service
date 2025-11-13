@@ -4,6 +4,20 @@ spring:
   profiles:
     active: ${PAYMENT_PROFILE:dev}
 
+  datasource:
+    driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 5000
+
 management:
   endpoints:
     web:
@@ -12,6 +26,27 @@ management:
   endpoint:
     health:
       show-details: never
+
+springdoc:
+  use-fqn: true
+
+server:
+  port: ${SERVER_PORT}
+
+service:
+  product:
+    url: ${PRODUCT_SERVICE_URL}
+  order:
+    url: ${ORDER_SERVICE_URL}
+  payment:
+    url: ${PAYMENT_SERVICE_URL}
+
+payment:
+  toss:
+    client_api_key: ${TOSS_CLIENT_API_KEY}
+    secret_api_key: ${TOSS_SECRET_API_KEY}
+    success_url: ${TOSS_SUCCESS_URL}
+    fail_url: ${TOSS_FAIL_URL}
 
 logging:
   level:
