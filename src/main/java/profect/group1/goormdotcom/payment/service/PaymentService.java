@@ -207,9 +207,13 @@ public class PaymentService {
     }
 
     @Transactional
-    public void tossPaymentFail(PaymentFailRequestDto dto) {
+    public void tossPaymentFail(UUID userId, PaymentFailRequestDto dto) {
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(dto.getOrderId())
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
+
+        if(!paymentEntity.getUserId().equals(userId)) {
+            throw new PaymentHandler(ErrorStatus.PAYMENT_FORBIDDEN);
+        }
 
         PaymentHistory history = PaymentHistory.create(
                 paymentEntity.getId(),
@@ -239,9 +243,18 @@ public class PaymentService {
     }
 
     @Transactional
-    public Payment tossPaymentCancel(PaymentCancelRequestDto dto) {
+    public Payment tossPaymentCancel(UUID userId, PaymentCancelRequestDto dto) {
+        log.info("[CANCEL DEBUG] userId={}, orderId={}, dto={}",
+                userId,
+                dto.getOrderId(),
+                dto);
+
         PaymentEntity paymentEntity = paymentRepository.findByOrderId(dto.getOrderId())
                 .orElseThrow(() -> new PaymentHandler(ErrorStatus._PAYMENT_NOT_FOUND));
+
+        if(!paymentEntity.getUserId().equals(userId)) {
+            throw new PaymentHandler(ErrorStatus.PAYMENT_FORBIDDEN);
+        }
 
         //상태 검증
         if (paymentEntity.getStatus().equals("PAY0004"))

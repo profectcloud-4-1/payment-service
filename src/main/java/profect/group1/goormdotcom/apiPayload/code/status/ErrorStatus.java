@@ -34,6 +34,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _ALREADY_CANCELED_REQUEST(HttpStatus.CONFLICT, "PAYMENT409", "이미 처리 중인 결제 요청입니다."),
     _PAYMENT_CANCEL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PAYMENT500", "결제 취소 처리 중 오류가 발생했습니다."),
     _INVALID_CANCEL_AMOUNT(HttpStatus.BAD_REQUEST, "PAYMENT400", "취소 금액이 남은 결제 금액을 초과했습니다."),
+    PAYMENT_FORBIDDEN(HttpStatus.FORBIDDEN,"PAY403",  "요청에 필요한 권한이 없습니다."),
 
     _INSUFFICIENT_STOCK_QUANTITY(HttpStatus.BAD_REQUEST, "STOCK400", "현재 재고가 요청한 수보다 적습니다."),
     _ADJUST_STOCK_FAILED(HttpStatus.CONFLICT, "STOCK409", "재고 변경에 실패했습니다.");
