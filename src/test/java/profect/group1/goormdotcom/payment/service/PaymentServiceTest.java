@@ -79,8 +79,8 @@ public class PaymentServiceTest {
     @Mock
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
-    private PaymentEntity createPaymentEntity(UUID id, UUID orderId, String paymentKey, Long amount, String status) {
-        return new PaymentEntity(id, UUID.randomUUID(), orderId, "Test Order", status, amount, 0L, paymentKey, LocalDateTime.now(), null);
+    private PaymentEntity createPaymentEntity(UUID id, UUID userId, UUID orderId, String paymentKey, Long amount, String status) {
+        return new PaymentEntity(id, userId, orderId, "Test Order", status, amount, 0L, paymentKey, LocalDateTime.now(), null);
     }
 
     @BeforeEach
@@ -106,7 +106,7 @@ public class PaymentServiceTest {
 
         @Test
         @DisplayName("성공 - 결제 승인 및 관련 정보 저장")
-        void tossPaymentSuccess_Success() throws JsonProcessingException {
+        void tossPaymentSuccess_Success() {
             UUID userId = UUID.randomUUID();
             UUID orderId = UUID.randomUUID();
             String paymentKey = UUID.randomUUID().toString();
@@ -118,7 +118,7 @@ public class PaymentServiceTest {
             requestDto.setAmount(amount);
             requestDto.setOrderName("Test Order");
 
-            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), orderId, paymentKey, amount, "PAY0001");
+            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), userId, orderId, paymentKey, amount, "PAY0001");
             PaymentSuccessResponseDto tossResponse = new PaymentSuccessResponseDto("test_mid", paymentKey, orderId.toString(), "Test Order", "DONE", OffsetDateTime.now(), OffsetDateTime.now(), "KRW", "15000", "15000", "15000", "CARD");
 
             when(paymentRepository.findByOrderIdAndStatus(orderId, "PAY0000")).thenReturn(Optional.empty());
@@ -143,7 +143,8 @@ public class PaymentServiceTest {
         void tossPaymentSuccess_DuplicateRequest_ThrowsException() {
             PaymentSuccessRequestDto requestDto = new PaymentSuccessRequestDto();
             requestDto.setOrderId(UUID.randomUUID());
-            PaymentEntity existingPayment = createPaymentEntity(UUID.randomUUID(), requestDto.getOrderId(), "key", 1000L, "PAY0000");
+            UUID userId = UUID.randomUUID();
+            PaymentEntity existingPayment = createPaymentEntity(UUID.randomUUID(), userId, requestDto.getOrderId(), "key", 1000L, "PAY0000");
             when(paymentRepository.findByOrderIdAndStatus(any(), anyString())).thenReturn(Optional.of(existingPayment));
 
             PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentSuccess(requestDto, UUID.randomUUID()));
@@ -190,14 +191,15 @@ public class PaymentServiceTest {
         @Test
         @DisplayName("성공 - 결제 실패 처리")
         void tossPaymentFail_Success() {
+            UUID userId = UUID.randomUUID();
             UUID orderId = UUID.randomUUID();
             PaymentFailRequestDto requestDto = new PaymentFailRequestDto();
             requestDto.setOrderId(orderId);
 
-            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), orderId, "some_key", 10000L, "PAY0000");
-            when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.of(paymentEntity));
+            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), userId, orderId, "some_key", 10000L, "PAY0000");
+            when(paymentRepository.findByOrderId(any(UUID.class))).thenReturn(Optional.of(paymentEntity));
 
-            paymentService.tossPaymentFail(requestDto);
+            paymentService.tossPaymentFail(userId, requestDto);
 
             verify(paymentRepository, times(1)).save(any(PaymentEntity.class));
             verify(paymentHistoryRepository, times(1)).save(any());
@@ -215,7 +217,8 @@ public class PaymentServiceTest {
             when(paymentRepository.findByOrderId(any(UUID.class))).thenReturn(Optional.empty());
 
             // when & then
-            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentFail(requestDto));
+            UUID userId = UUID.randomUUID();
+            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentFail(userId, requestDto));
             assertThat(exception.getCode()).isEqualTo(ErrorStatus._PAYMENT_NOT_FOUND);
         }
     }
@@ -227,12 +230,13 @@ public class PaymentServiceTest {
         @Test
         @DisplayName("성공 - 결제 취소 요청")
         void tossPaymentCancel_Success() {
+            UUID userId = UUID.randomUUID();
             UUID orderId = UUID.randomUUID();
             PaymentCancelRequestDto requestDto = PaymentCancelRequestDto.builder().orderId(orderId).build();
-            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), orderId, "some_key", 10000L, "PAY0001");
-            when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.of(paymentEntity));
+            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), userId, orderId, "some_key", 10000L, "PAY0001");
+            when(paymentRepository.findByOrderId(any(UUID.class))).thenReturn(Optional.of(paymentEntity));
 
-            paymentService.tossPaymentCancel(requestDto);
+            paymentService.tossPaymentCancel(userId, requestDto);
 
             verify(paymentRepository, times(1)).save(paymentEntity);
             verify(paymentHistoryRepository, times(1)).save(any());
@@ -243,12 +247,13 @@ public class PaymentServiceTest {
         @Test
         @DisplayName("실패 - 이미 취소된 결제")
         void tossPaymentCancel_AlreadyCanceled_ThrowsException() {
+            UUID userId = UUID.randomUUID();
             UUID orderId = UUID.randomUUID();
             PaymentCancelRequestDto requestDto = PaymentCancelRequestDto.builder().orderId(orderId).build();
-            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), orderId, "some_key", 10000L, "PAY0004");
-            when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.of(paymentEntity));
+            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), userId, orderId, "some_key", 10000L, "PAY0004");
+            when(paymentRepository.findByOrderId(any(UUID.class))).thenReturn(Optional.of(paymentEntity));
 
-            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentCancel(requestDto));
+            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentCancel(userId, requestDto));
             assertThat(exception.getCode()).isEqualTo(ErrorStatus._ALREADY_CANCELED_REQUEST);
         }
 
@@ -256,11 +261,10 @@ public class PaymentServiceTest {
         @DisplayName("실패 - 결제 정보를 찾을 수 없음")
         void tossPaymentCancel_PaymentNotFound_ThrowsException() {
             // given
-            PaymentCancelRequestDto requestDto = PaymentCancelRequestDto.builder().orderId(UUID.randomUUID()).build();
             when(paymentRepository.findByOrderId(any(UUID.class))).thenReturn(Optional.empty());
-
-            // when & then
-            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentCancel(requestDto));
+            PaymentCancelRequestDto requestDto = PaymentCancelRequestDto.builder().orderId(UUID.randomUUID()).build();
+            UUID userId = UUID.randomUUID();
+            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentCancel(userId, requestDto));
             assertThat(exception.getCode()).isEqualTo(ErrorStatus._PAYMENT_NOT_FOUND);
         }
 
@@ -268,13 +272,14 @@ public class PaymentServiceTest {
         @DisplayName("실패 - 취소할 수 없는 결제 상태")
         void tossPaymentCancel_InvalidStatus_ThrowsException() {
             // given
+            UUID userId = UUID.randomUUID();
             UUID orderId = UUID.randomUUID();
             PaymentCancelRequestDto requestDto = PaymentCancelRequestDto.builder().orderId(orderId).build();
-            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), orderId, "some_key", 10000L, "PAY0000"); // Not PAY0001
-            when(paymentRepository.findByOrderId(orderId)).thenReturn(Optional.of(paymentEntity));
+            PaymentEntity paymentEntity = createPaymentEntity(UUID.randomUUID(), userId, orderId, "some_key", 10000L, "PAY0000"); // Not PAY0001
+            when(paymentRepository.findByOrderId(any(UUID.class))).thenReturn(Optional.of(paymentEntity));
 
             // when & then
-            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentCancel(requestDto));
+            PaymentHandler exception = assertThrows(PaymentHandler.class, () -> paymentService.tossPaymentCancel(userId, requestDto));
             assertThat(exception.getCode()).isEqualTo(ErrorStatus._INVALID_PAYMENT_STATUS);
         }
     }
@@ -348,7 +353,8 @@ public class PaymentServiceTest {
         void updatePaymentCancelStatus_Success() {
             // given
             UUID paymentId = UUID.randomUUID();
-            PaymentEntity paymentEntity = createPaymentEntity(paymentId, UUID.randomUUID(), "key", 10000L, "PAY0003");
+            UUID userId = UUID.randomUUID();
+            PaymentEntity paymentEntity = createPaymentEntity(paymentId, userId, UUID.randomUUID(), "key", 10000L, "PAY0003");
             when(paymentRepository.findById(paymentId)).thenReturn(Optional.of(paymentEntity));
 
             // when
@@ -383,8 +389,8 @@ public class PaymentServiceTest {
             UUID userId = UUID.randomUUID();
             PaymentSearchRequestDto requestDto = PaymentSearchRequestDto.of("PAY0001", null, null, null, null);
 
-            PaymentEntity successPayment = createPaymentEntity(UUID.randomUUID(), UUID.randomUUID(), "key1", 1000L, "PAY0001");
-            PaymentEntity failPayment = createPaymentEntity(UUID.randomUUID(), UUID.randomUUID(), "key2", 2000L, "PAY0002");
+            PaymentEntity successPayment = createPaymentEntity(UUID.randomUUID(), userId, UUID.randomUUID(), "key1", 1000L, "PAY0001");
+            PaymentEntity failPayment = createPaymentEntity(UUID.randomUUID(), userId, UUID.randomUUID(), "key2", 2000L, "PAY0002");
             Slice<PaymentEntity> slice = new SliceImpl<>(List.of(successPayment, failPayment));
             when(paymentRepository.findAllByUserId(any(), any())).thenReturn(slice);
 
@@ -405,9 +411,9 @@ public class PaymentServiceTest {
             UUID userId = UUID.randomUUID();
             PaymentSearchRequestDto requestDto = PaymentSearchRequestDto.of(null, LocalDateTime.now().minusDays(1), LocalDateTime.now().plusDays(1), null, null);
 
-            PaymentEntity recentPayment = createPaymentEntity(UUID.randomUUID(), UUID.randomUUID(), "key1", 1000L, "PAY0001");
+            PaymentEntity recentPayment = createPaymentEntity(UUID.randomUUID(), userId, UUID.randomUUID(), "key1", 1000L, "PAY0001");
             recentPayment.setApprovedAt(LocalDateTime.now());
-            PaymentEntity oldPayment = createPaymentEntity(UUID.randomUUID(), UUID.randomUUID(), "key2", 2000L, "PAY0001");
+            PaymentEntity oldPayment = createPaymentEntity(UUID.randomUUID(), userId, UUID.randomUUID(), "key2", 2000L, "PAY0001");
             oldPayment.setApprovedAt(LocalDateTime.now().minusDays(2));
             Slice<PaymentEntity> slice = new SliceImpl<>(List.of(recentPayment, oldPayment));
             when(paymentRepository.findAllByUserId(any(), any())).thenReturn(slice);
