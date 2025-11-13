@@ -12,7 +12,3 @@ management:
   endpoint:
     health:
       show-details: never
-
-logging:
-  level:
-    root: INFO
