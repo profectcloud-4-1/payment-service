@@ -52,7 +52,7 @@ public class SecurityConfig {
         res.setContentType("application/json;charset=UTF-8");
         res.getWriter().write(
                 """
-                {"code":"%s","message":"%s","data":null}
+                {"code":"%s","message":"%s","result":null}
                 """.formatted(code, message)
         );
     }
