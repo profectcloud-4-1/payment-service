@@ -2,6 +2,7 @@ package profect.group1.goormdotcom.apiPayload.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,7 @@ import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.BaseErrorCode;
 import profect.group1.goormdotcom.apiPayload.code.ErrorReasonDTO;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
+import org.springframework.core.env.Environment;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -31,9 +33,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
+@RequiredArgsConstructor
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
     /* ========= 공통 컨텍스트 유틸 ========= */
+
+    private final Environment env;
 
     private String getRequestId(HttpServletRequest req) {
         Object id = req.getAttribute("X-Request-ID");
@@ -59,6 +64,10 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         return req.getRemoteAddr();
     }
 
+    private boolean isProd() {
+        return Arrays.asList(env.getActiveProfiles()).contains("prod");
+    }
+
     /* ========= 공통 로깅 ========= */
 
     private void logRequest(String level, String tag, WebRequest webRequest, String detail, Throwable ex) {
@@ -78,12 +87,20 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
 
         switch (level.toUpperCase()) {
-            case "ERROR" -> log.error(msg, ex);
-            case "WARN"  -> {
-                log.warn(msg);
-                if (log.isDebugEnabled() && ex != null) log.debug("[{}-stack]", tag, ex);
+            case "ERROR" -> {
+                if (isProd()) {
+                    log.error(msg);
+                } else {
+                    log.error(msg, ex);
+                }
             }
-            default      -> log.info(msg);
+            case "WARN" -> {
+                log.warn(msg);
+                if (!isProd() && ex != null) {
+                    log.debug("[{}-stack]", tag, ex);
+                }
+            }
+            default -> log.info(msg);
         }
     }
 
