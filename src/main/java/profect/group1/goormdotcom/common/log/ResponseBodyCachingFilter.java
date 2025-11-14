@@ -1,4 +1,4 @@
-package profect.group1.goormdotcom.common.logging;
+package profect.group1.goormdotcom.common.log;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
