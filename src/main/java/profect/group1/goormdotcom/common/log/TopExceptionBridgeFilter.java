@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
@@ -28,6 +29,14 @@ import java.util.UUID;
 public class TopExceptionBridgeFilter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver handlerExceptionResolver;
+    private final Environment env;
+
+    private boolean isProd() {
+        for (String p : env.getActiveProfiles()) {
+            if ("prod".equalsIgnoreCase(p)) return true;
+        }
+        return false;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -45,19 +54,16 @@ public class TopExceptionBridgeFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 로깅 요청 ID
+        // 요청 ID
         String requestId = UUID.randomUUID().toString();
-
         req.setAttribute("X-Request-ID", requestId);
         res.addHeader("X-Request-ID", requestId);
 
-        // 본문을 캐싱 래퍼로 감싸기
         ContentCachingRequestWrapper request = new ContentCachingRequestWrapper(req);
         ContentCachingResponseWrapper response = new ContentCachingResponseWrapper(res);
 
         long start = System.currentTimeMillis();
 
-        // 요청 로깅
         logRequest(request, requestId);
 
         Throwable thrown = null;
@@ -66,8 +72,10 @@ public class TopExceptionBridgeFilter extends OncePerRequestFilter {
         } catch (Throwable ex) {
             thrown = ex;
             log.error("[FilterError] id={} uri={} msg={}", requestId, req.getRequestURI(), ex.getMessage(), ex);
-            handlerExceptionResolver.resolveException(request, response, null,
-                    (Exception) (ex instanceof Exception ? ex : new RuntimeException(ex)));
+            handlerExceptionResolver.resolveException(
+                    request, response, null,
+                    (Exception) (ex instanceof Exception ? ex : new RuntimeException(ex))
+            );
         } finally {
             long took = System.currentTimeMillis() - start;
             logResponse(requestId, request, response, thrown, took);
@@ -75,6 +83,7 @@ public class TopExceptionBridgeFilter extends OncePerRequestFilter {
         }
     }
 
+    /* ====================== 요청 로그 ======================== */
     private void logRequest(HttpServletRequest request, String requestId) {
         final String method = request.getMethod();
         final String uri = request.getRequestURI();
@@ -92,9 +101,8 @@ public class TopExceptionBridgeFilter extends OncePerRequestFilter {
             log.info("[REQ PARAM] id={} {} {} params={}", requestId, method, uri, params);
         }
 
-        // 본문
         String body = readRequestBody(request);
-        if (!body.isBlank()) {
+        if (!body.isBlank() && !isProd()) {
             log.info("[REQ BODY] id={} {} {} body={}", requestId, method, uri, LoggingUtil.maskSensitiveFields(body));
         }
 
@@ -103,20 +111,32 @@ public class TopExceptionBridgeFilter extends OncePerRequestFilter {
         }
     }
 
+    /* ====================== 응답 로그 ======================== */
     private void logResponse(String requestId, HttpServletRequest request,
                              ContentCachingResponseWrapper response, Throwable ex, long tookMs) {
+
         final String uri = request.getRequestURI();
         final int status = response.getStatus();
-        final String body = readResponseBody(response);
+        final String rawBody = readResponseBody(response);
+
+        if (isProd() && ex == null) {
+            log.info("[RES] id={} {} → status={} took={}ms", requestId, uri, status, tookMs);
+            return;
+        }
+
+        String pretty = LoggingUtil.toPrettyJson(rawBody);
+        String safeBody = LoggingUtil.maskSensitiveFields(pretty);
 
         if (ex != null) {
             log.error("[RES] id={} {} → status={} took={}ms body={} (Exception: {})",
-                    requestId, uri, status, tookMs, LoggingUtil.toPrettyJson(body), ex.getClass().getSimpleName());
+                    requestId, uri, status, tookMs, safeBody, ex.getClass().getSimpleName());
         } else {
             log.info("[RES] id={} {} → status={} took={}ms body={}",
-                    requestId, uri, status, tookMs, LoggingUtil.toPrettyJson(body));
+                    requestId, uri, status, tookMs, safeBody);
         }
     }
+
+    /* ====================== 작은 헬퍼들 ======================== */
 
     private Map<String, String> extractRequestParams(HttpServletRequest request) {
         Map<String, String> m = new LinkedHashMap<>();

@@ -2,7 +2,7 @@ spring:
   application:
     name: "payment-service"
   profiles:
-    active: ${PAYMENT_PROFILE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
     driver-class-name: ${DB_DRIVER:org.postgresql.Driver}
@@ -47,7 +47,3 @@ payment:
     secret_api_key: ${TOSS_SECRET_API_KEY}
     success_url: ${TOSS_SUCCESS_URL}
     fail_url: ${TOSS_FAIL_URL}
-
-logging:
-  level:
-    root: INFO
