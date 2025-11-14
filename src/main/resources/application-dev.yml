@@ -12,8 +12,3 @@ spring:
       hibernate:
         default_batch_fetch_size: 200
         format_sql: true
-
-  datasource:
-    hikari:
-      minimum-idle: 2
-      maximum-pool-size: 5
