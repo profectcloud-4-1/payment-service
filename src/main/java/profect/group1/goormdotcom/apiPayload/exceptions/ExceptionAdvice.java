@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -33,12 +34,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
-@RequiredArgsConstructor
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
+
+    @Autowired(required = false)
+    private Environment env;
 
     /* ========= 공통 컨텍스트 유틸 ========= */
 
-    private final Environment env;
 
     private String getRequestId(HttpServletRequest req) {
         Object id = req.getAttribute("X-Request-ID");
@@ -65,6 +67,9 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     }
 
     private boolean isProd() {
+        if (env == null) {
+            return false;
+        }
         return Arrays.asList(env.getActiveProfiles()).contains("prod");
     }
 
