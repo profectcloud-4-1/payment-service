@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +32,9 @@ import java.util.UUID;
 public interface PaymentApiDocs {
 
     @Operation(
-            summary = "결제 성공 리디렉션 API",
-            description = "결제 성공 시 리디렉션되는 API입니다."
+        summary = "결제 성공 리디렉션 API",
+        description = "결제 성공 시 리디렉션되는 API입니다.",
+        security = { @SecurityRequirement(name = "bearerAuth"), @SecurityRequirement(name = "User-Id"), @SecurityRequirement(name = "User-Roles") }
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공입니다"),
@@ -49,7 +51,8 @@ public interface PaymentApiDocs {
 
     @Operation(
             summary = "결제 실패 리디렉션 API",
-            description = "결제 실패 시 리디렉션되는 API입니다."
+            description = "결제 실패 시 리디렉션되는 API입니다.",
+            security = { @SecurityRequirement(name = "bearerAuth"), @SecurityRequirement(name = "User-Id"), @SecurityRequirement(name = "User-Roles") }
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공입니다"),
@@ -71,7 +74,8 @@ public interface PaymentApiDocs {
             • 필터 조건: 결제 상태(status), 결제 시각(fromAt~toAt), 금액 범위(minAmount~maxAmount)<br>
             • 페이지네이션은 Slice 기반으로, 전체 건수(totalCount)는 반환하지 않습니다.<br>
             • 기본 정렬: 결제 생성일(createdAt) 내림차순입니다.
-            """
+            """,
+            security = { @SecurityRequirement(name = "bearerAuth"), @SecurityRequirement(name = "User-Id"), @SecurityRequirement(name = "User-Roles") }
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "성공입니다"),

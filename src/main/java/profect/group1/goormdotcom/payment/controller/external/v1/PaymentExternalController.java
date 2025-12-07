@@ -15,6 +15,7 @@ import profect.group1.goormdotcom.payment.controller.external.v1.dto.response.Pa
 import profect.group1.goormdotcom.payment.service.PaymentService;
 
 import org.springframework.data.domain.Pageable;
+import profect.group1.goormdotcom.payment.service.PaymentTestService;
 
 import java.util.UUID;
 
@@ -23,20 +24,23 @@ import java.util.UUID;
 @RequestMapping("/api/v1/payments")
 public class PaymentExternalController implements PaymentApiDocs {
     private final PaymentService paymentService;
+    private final PaymentTestService paymentTestService;
 
     @Override
     @GetMapping("/toss/success")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(@ModelAttribute @Validated PaymentSuccessRequestDto paymentSuccessRequestDto ,
                                                                      @LoginUser UUID userId) {
-        return ApiResponse.onSuccess(paymentService.tossPaymentSuccess(paymentSuccessRequestDto, userId));
+//        return ApiResponse.onSuccess(paymentService.tossPaymentSuccess(paymentSuccessRequestDto, userId));
+        return ApiResponse.onSuccess(paymentTestService.tossPaymentSuccess(paymentSuccessRequestDto, userId));
     }
 
     @Override
     @GetMapping("/toss/fail")
     @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<Void> tossPaymentFail(@ModelAttribute @Valid PaymentFailRequestDto paymentFailRequestDto, @LoginUser UUID userId) {
-        paymentService.tossPaymentFail(userId, paymentFailRequestDto);
+//        paymentService.tossPaymentFail(userId, paymentFailRequestDto);
+        paymentTestService.tossPaymentFail(userId, paymentFailRequestDto);
         return ApiResponse.onSuccess(null);
     }
 
