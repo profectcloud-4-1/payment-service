@@ -45,7 +45,7 @@ public class PaymentTestService {
 
     @Transactional
     public PaymentSuccessResponseDto tossPaymentSuccess(PaymentSuccessRequestDto dto, UUID userId) {
-        log.info("Call tossPaymentSuccess");
+
         //처리중인 결제내역이 있는지 확인
         if (dto.getOrderId() != null) {
             paymentRepository.findByOrderIdAndStatus(dto.getOrderId(), "PAY0000")
@@ -55,9 +55,9 @@ public class PaymentTestService {
         }
 
         //멱등성 체크-> 이미 처리된 paymentKey인지 확인
-//        if(paymentRepository.existsByPaymentKey(dto.getPaymentKey())) {
-//            return null;
-//        }
+        if(paymentRepository.existsByPaymentKey(dto.getPaymentKey())) {
+            return null;
+        }
 
         //금액 검증
         //if (!paymentEntity.getAmount().equals(dto.getAmount())) {
@@ -77,19 +77,19 @@ public class PaymentTestService {
 
         PaymentSuccessResponseDto response = new PaymentSuccessResponseDto(
                 "MID_1234567890",
-                "pay_20251207_ABCDEF123456",
-                "order_0001",
-                "Goormdotcom Product",
+                dto.getPaymentKey(),
+                dto.getOrderId().toString(),
+                dto.getOrderName(),
                 "DONE",
                 OffsetDateTime.now(),
                 OffsetDateTime.now(),
                 "KRW",
-                "15000",
+                dto.getAmount().toString(),
                 "0",
-                "15000",
+                dto.getAmount().toString(),
                 "CARD"
         );
-        log.info("Create test response dto {}", response);
+
         //offsetTime 직렬화를 위한 클래스
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
@@ -115,7 +115,6 @@ public class PaymentTestService {
 
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
 
-        log.info("HI");
         try {
             orderClient.notifyPaymentSuccessResult(
                     savedEntity.getOrderId(),
