@@ -14,16 +14,14 @@ import java.util.UUID;
 public class OrderClientFallBack implements OrderClient {
 
     @Override
-    public ApiResponse<Object> notifyPaymentSuccessResult(UUID orderId, PaymentSuccessResultDto dto) {
+    public void notifyPaymentSuccessResult(UUID orderId, PaymentSuccessResultDto dto) {
         log.error("[Feign-Fallback] order-service 호출 실패: orderId={}, dto={}", orderId, dto);
         // TODO: MSA 분리 시 아웃박스 추가
-        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
     }
 
     @Override
-    public ApiResponse<Object> notifyPaymentFailResult(UUID orderId, PaymentFailResultDto dto) {
+    public void notifyPaymentFailResult(UUID orderId, PaymentFailResultDto dto) {
         log.error("[Feign-Fallback] order-service 호출 실패: orderId={}, dto={}", orderId, dto);
         // TODO: MSA 분리 시 아웃박스 추가
-        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
     }
 }

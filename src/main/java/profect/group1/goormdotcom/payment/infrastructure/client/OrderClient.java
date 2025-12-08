@@ -17,13 +17,13 @@ import java.util.UUID;
 )
 public interface OrderClient {
     @PostMapping("/internal/v1/orders/{orderId}/payment/success")
-    ApiResponse<Object> notifyPaymentSuccessResult(
+    void notifyPaymentSuccessResult(
             @PathVariable UUID orderId,
             @RequestBody PaymentSuccessResultDto paymentSuccessResultDto
     );
 
     @PostMapping("/internal/v1/orders/{orderId}/payment/fail")
-    ApiResponse<Object> notifyPaymentFailResult(
+    void notifyPaymentFailResult(
             @PathVariable UUID orderId,
             @RequestBody PaymentFailResultDto paymentFailResultDto
     );

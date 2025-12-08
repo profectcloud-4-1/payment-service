@@ -58,7 +58,7 @@ public class PaymentTestService {
 
         //멱등성 체크-> 이미 처리된 paymentKey인지 확인
         if(paymentRepository.existsByPaymentKey(dto.getPaymentKey())) {
-            throw new PaymentHandler(ErrorStatus._DUPLICATE_PAYMENT_REQUEST);
+            throw new PaymentHandler(ErrorStatus._DUPLICATE_PAYMENT_KEY);
         }
 
         //금액 검증
@@ -118,7 +118,7 @@ public class PaymentTestService {
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
 
         try {
-            ApiResponse<Object> orderResponse = orderClient.notifyPaymentSuccessResult(
+            orderClient.notifyPaymentSuccessResult(
                     savedEntity.getOrderId(),
                     new PaymentSuccessResultDto(
                             savedEntity.getUserId(),
@@ -127,14 +127,11 @@ public class PaymentTestService {
                             response.approvedAt()
                     )
             );
-            // 주문 정보 못 찾았을 때, 에러 throw (실제로는 PG사 주문내역을 먼저 검증하기 때문에 주문 정보를 못찾는 일을 극히 드물것으로 판단됨)
-            if (orderResponse.getCode().equals(ErrorStatus._NOT_FOUND.getCode())) {
-                throw new PaymentHandler(ErrorStatus._BAD_REQUEST);
-            }
 
             log.info("[ORDER SYNC] 주문서비스 결제결과 전달 성공: {}", savedEntity.getOrderId());
         } catch (Exception e) {
             log.error("[ORDER SYNC] 주문서비스 결제결과 전달 실패: {}", e.getMessage());
+            throw e;
         }
         return response;
     }
@@ -163,19 +160,17 @@ public class PaymentTestService {
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
 
         try {
-            ApiResponse<Object> orderResponse = orderClient.notifyPaymentFailResult(
+            orderClient.notifyPaymentFailResult(
                     paymentEntity.getOrderId(),
                     new PaymentFailResultDto(
                             "PAY0002",                //결제 실패
                             paymentEntity.getAmount()
                     )
             );
-            // 주문 정보 못 찾았을 때, 에러 throw (실제로는 PG사 주문내역을 먼저 검증하기 때문에 주문 정보를 못찾는 일을 극히 드물것으로 판단됨)
-            if (orderResponse.getCode().equals(ErrorStatus._NOT_FOUND.getCode())) {
-                throw new PaymentHandler(ErrorStatus._BAD_REQUEST);
-            }
+
         } catch (Exception e) {
             log.error("[ORDER SYNC] 주문서비스 결제결과 전달 실패: {}", e.getMessage());
+            throw e;
         }
     }
 

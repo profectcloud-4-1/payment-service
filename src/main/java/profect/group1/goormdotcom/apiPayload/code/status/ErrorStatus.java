@@ -28,6 +28,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
 
     _DUPLICATE_PAYMENT_REQUEST(HttpStatus.CONFLICT, "PAYMENT409", "이미 처리 중인 결제 요청입니다."),
+    _DUPLICATE_PAYMENT_KEY(HttpStatus.CONFLICT, "PAYMENT409", "중복된 결제 요청입니다."),
     _PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAYMENT404", "존재하지 않는 결제 정보입니다."),
     _INVALID_PAYMENT_AMOUNT(HttpStatus.BAD_REQUEST, "PAYMENT400", "결제 금액이 일치하지 않습니다."),
     _INVALID_PAYMENT_STATUS(HttpStatus.BAD_REQUEST, "PAYMENT400", "현재 상태에서는 결제를 취소할 수 없습니다."),
