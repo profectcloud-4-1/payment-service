@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import profect.group1.goormdotcom.apiPayload.ApiResponse;
+import profect.group1.goormdotcom.common.config.FeignConfig;
 import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentFailResultDto;
 import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentSuccessResultDto;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 @FeignClient(
         name = "payment-to-order",
         url = "${service.order.url}",
+        configuration = FeignConfig.class,
         fallback = OrderClientFallBack.class
 )
 public interface OrderClient {
