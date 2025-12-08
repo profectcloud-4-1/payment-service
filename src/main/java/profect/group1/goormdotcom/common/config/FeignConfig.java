@@ -22,14 +22,14 @@ public class FeignConfig implements RequestInterceptor {
 
         var req = attrs.getRequest();
 
-        String userId = req.getHeader("user-id");
+        String userId = req.getHeader("User-Id");
         if (userId != null) {
-            template.header("user-id", userId);
+            template.header("User-Id", userId);
         }
 
-        String userRole = req.getHeader("user-role");
+        String userRole = req.getHeader("User-Roles");
         if (userRole != null) {
-            template.header("user-role", userRole);
+            template.header("User-Roles", userRole);
         }
     }
 
