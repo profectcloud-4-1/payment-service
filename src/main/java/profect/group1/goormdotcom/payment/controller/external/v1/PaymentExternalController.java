@@ -28,7 +28,6 @@ public class PaymentExternalController implements PaymentApiDocs {
 
     @Override
     @GetMapping("/toss/success")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<PaymentSuccessResponseDto> tossPaymentSuccess(@ModelAttribute @Validated PaymentSuccessRequestDto paymentSuccessRequestDto ,
                                                                      @LoginUser UUID userId) {
 //        return ApiResponse.onSuccess(paymentService.tossPaymentSuccess(paymentSuccessRequestDto, userId));
@@ -37,7 +36,6 @@ public class PaymentExternalController implements PaymentApiDocs {
 
     @Override
     @GetMapping("/toss/fail")
-    @PreAuthorize("hasRole('CUSTOMER')")
     public ApiResponse<Void> tossPaymentFail(@ModelAttribute @Valid PaymentFailRequestDto paymentFailRequestDto, @LoginUser UUID userId) {
 //        paymentService.tossPaymentFail(userId, paymentFailRequestDto);
         paymentTestService.tossPaymentFail(userId, paymentFailRequestDto);
