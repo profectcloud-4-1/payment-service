@@ -4,6 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentFailResultDto;
 import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentSuccessResultDto;
 
@@ -16,13 +17,13 @@ import java.util.UUID;
 )
 public interface OrderClient {
     @PostMapping("/internal/v1/orders/{orderId}/payment/success")
-    void notifyPaymentSuccessResult(
+    ApiResponse<Object> notifyPaymentSuccessResult(
             @PathVariable UUID orderId,
             @RequestBody PaymentSuccessResultDto paymentSuccessResultDto
     );
 
     @PostMapping("/internal/v1/orders/{orderId}/payment/fail")
-    void notifyPaymentFailResult(
+    ApiResponse<Object> notifyPaymentFailResult(
             @PathVariable UUID orderId,
             @RequestBody PaymentFailResultDto paymentFailResultDto
     );

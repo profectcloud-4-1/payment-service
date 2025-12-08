@@ -2,6 +2,8 @@ package profect.group1.goormdotcom.payment.infrastructure.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import profect.group1.goormdotcom.apiPayload.ApiResponse;
+import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
 import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentFailResultDto;
 import profect.group1.goormdotcom.payment.infrastructure.client.dto.PaymentSuccessResultDto;
 
@@ -12,14 +14,16 @@ import java.util.UUID;
 public class OrderClientFallBack implements OrderClient {
 
     @Override
-    public void notifyPaymentSuccessResult(UUID orderId, PaymentSuccessResultDto dto) {
+    public ApiResponse<Object> notifyPaymentSuccessResult(UUID orderId, PaymentSuccessResultDto dto) {
         log.error("[Feign-Fallback] order-service 호출 실패: orderId={}, dto={}", orderId, dto);
         // TODO: MSA 분리 시 아웃박스 추가
+        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
     }
 
     @Override
-    public void notifyPaymentFailResult(UUID orderId, PaymentFailResultDto dto) {
+    public ApiResponse<Object> notifyPaymentFailResult(UUID orderId, PaymentFailResultDto dto) {
         log.error("[Feign-Fallback] order-service 호출 실패: orderId={}, dto={}", orderId, dto);
         // TODO: MSA 분리 시 아웃박스 추가
+        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST.getCode(), ErrorStatus._BAD_REQUEST.getMessage(), null);
     }
 }

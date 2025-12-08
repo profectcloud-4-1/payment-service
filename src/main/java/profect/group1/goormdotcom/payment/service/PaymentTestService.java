@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import profect.group1.goormdotcom.apiPayload.ApiResponse;
 import profect.group1.goormdotcom.apiPayload.code.status.ErrorStatus;
 import profect.group1.goormdotcom.apiPayload.exceptions.handler.PaymentHandler;
 import profect.group1.goormdotcom.payment.config.TossPaymentConfig;
@@ -29,6 +30,7 @@ import profect.group1.goormdotcom.payment.repository.mapper.PaymentMapper;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -56,7 +58,7 @@ public class PaymentTestService {
 
         //멱등성 체크-> 이미 처리된 paymentKey인지 확인
         if(paymentRepository.existsByPaymentKey(dto.getPaymentKey())) {
-            return null;
+            throw new PaymentHandler(ErrorStatus._DUPLICATE_PAYMENT_REQUEST);
         }
 
         //금액 검증
@@ -116,7 +118,7 @@ public class PaymentTestService {
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
 
         try {
-            orderClient.notifyPaymentSuccessResult(
+            ApiResponse<Object> orderResponse = orderClient.notifyPaymentSuccessResult(
                     savedEntity.getOrderId(),
                     new PaymentSuccessResultDto(
                             savedEntity.getUserId(),
@@ -125,6 +127,11 @@ public class PaymentTestService {
                             response.approvedAt()
                     )
             );
+            // 주문 정보 못 찾았을 때, 에러 throw (실제로는 PG사 주문내역을 먼저 검증하기 때문에 주문 정보를 못찾는 일을 극히 드물것으로 판단됨)
+            if (orderResponse.getCode().equals(ErrorStatus._NOT_FOUND.getCode())) {
+                throw new PaymentHandler(ErrorStatus._BAD_REQUEST);
+            }
+
             log.info("[ORDER SYNC] 주문서비스 결제결과 전달 성공: {}", savedEntity.getOrderId());
         } catch (Exception e) {
             log.error("[ORDER SYNC] 주문서비스 결제결과 전달 실패: {}", e.getMessage());
@@ -156,13 +163,17 @@ public class PaymentTestService {
         paymentHistoryRepository.save(PaymentHistoryMapper.toEntity(history));
 
         try {
-            orderClient.notifyPaymentFailResult(
+            ApiResponse<Object> orderResponse = orderClient.notifyPaymentFailResult(
                     paymentEntity.getOrderId(),
                     new PaymentFailResultDto(
                             "PAY0002",                //결제 실패
                             paymentEntity.getAmount()
                     )
             );
+            // 주문 정보 못 찾았을 때, 에러 throw (실제로는 PG사 주문내역을 먼저 검증하기 때문에 주문 정보를 못찾는 일을 극히 드물것으로 판단됨)
+            if (orderResponse.getCode().equals(ErrorStatus._NOT_FOUND.getCode())) {
+                throw new PaymentHandler(ErrorStatus._BAD_REQUEST);
+            }
         } catch (Exception e) {
             log.error("[ORDER SYNC] 주문서비스 결제결과 전달 실패: {}", e.getMessage());
         }
