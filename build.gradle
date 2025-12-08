@@ -75,6 +75,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// feign client
 	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'

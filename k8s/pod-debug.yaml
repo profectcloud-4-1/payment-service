@@ -1,0 +1,19 @@
+# Debug용
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: payment-debug
+  namespace: goormdotcom-local
+spec:
+  restartPolicy: Never
+  containers:
+    - name: payment-debug
+      image: payment:25112401
+      command: ["sh"]
+      args: ["-c", "sleep infinity"]
+      envFrom:
+        - configMapRef:
+            name: payment-service-config
+        - secretRef:
+            name: payment-service-secret
